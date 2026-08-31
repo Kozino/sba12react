@@ -6,6 +6,8 @@ const express = require('express');
 const cors = require('cors');
 
 const { readLocalFile, isSupabase } = require('./src/storage');
+const { pool } = require('./src/db');
+const { dbErrorMessage } = require('./src/util');
 const publicRoutes = require('./src/routes/public');
 const adminRoutes = require('./src/routes/admin');
 
@@ -86,19 +88,27 @@ app.get('/file/:name', (req, res) => {
   res.send(data);
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({ ok: true, storage: isSupabase() ? 'supabase' : 'local' });
+app.get('/api/health', async (req, res) => {
+  const out = { ok: true, storage: isSupabase() ? 'supabase' : 'local' };
+  try {
+    await pool.query('SELECT 1');
+    out.db = 'ok';
+  } catch (e) {
+    out.ok = false;
+    out.db = 'ERROR: ' + (e.code || e.message);
+  }
+  res.json(out);
 });
 
 app.use('/api', publicRoutes);
 app.use('/api/admin', adminRoutes);
 
-// JSON 404 + error handler
+// JSON 404 + error handler (with actionable database diagnostics)
 app.use((req, res) => res.status(404).json({ error: 'Not found.' }));
 app.use((err, req, res, next) => {
   console.error(err);
   if (res.headersSent) return next(err);
-  res.status(500).json({ error: 'Something went wrong on the server. Please try again.' });
+  res.status(500).json({ error: dbErrorMessage(err) });
 });
 
 const PORT = process.env.PORT || 8081;
