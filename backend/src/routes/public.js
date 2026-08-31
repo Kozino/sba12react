@@ -7,6 +7,7 @@ const {
   DOC_TYPES,
   validEmail,
   validPhone,
+  dbErrorMessage,
 } = require('../util');
 
 const router = express.Router();
@@ -27,7 +28,7 @@ router.get('/home', async (req, res) => {
     res.json({ members: members.c, news, gallery });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'Could not load the home page.' });
+    res.status(500).json({ error: dbErrorMessage(e) });
   }
 });
 
