@@ -1,0 +1,16 @@
+# Netlify configuration — lives at the repo root.
+# The React app itself is in the "frontend/" folder (set via `base` below).
+
+[build]
+  base = "frontend/"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback: every route serves the React app, which routes client-side.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

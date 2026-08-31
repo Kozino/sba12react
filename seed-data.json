@@ -1,0 +1,356 @@
+{
+    "admins": [
+        {
+            "id": 1,
+            "username": "admin",
+            "password_hash": "$2y$12$PlrsWYdKSRLLUtIQtI0R0OrCJ/UuS90GVpyHp5MV3Glgwxmyx/8Sa",
+            "name": "Administrator"
+        }
+    ],
+    "members": [
+        {
+            "id": 1,
+            "unique_id": "SBA12P47",
+            "first_name": "Paschal",
+            "middle_name": "Ikechukwu",
+            "last_name": "Okoyeocha",
+            "email": "paschal.okoyeocha@example.com",
+            "phone": "+234 803 111 2222",
+            "hometown": "Akpu",
+            "hometown_parish": "Holy Trinity Cathedral, Akpu",
+            "residential_address": "No. 4 Seminary Road, Akpu, Anambra State",
+            "permanent_address": "Umuakpu, Orumba South LGA, Anambra State",
+            "status": "active",
+            "registered_at": "2025-10-05 10:00:00"
+        },
+        {
+            "id": 2,
+            "unique_id": "SBA12H29",
+            "first_name": "Henry",
+            "middle_name": "Okechukwu",
+            "last_name": "Nwankwo",
+            "email": "henry.nwankwo@example.com",
+            "phone": "+234 805 333 4444",
+            "hometown": "Nnewi",
+            "hometown_parish": "St. Mary's Cathedral, Nnewi",
+            "residential_address": "No. 12 Ihi-Ukwu, Nnewi, Anambra State",
+            "permanent_address": "Umuaka, Anambra East LGA, Anambra State",
+            "status": "active",
+            "registered_at": "2025-10-08 14:30:00"
+        },
+        {
+            "id": 3,
+            "unique_id": "SBA12E83",
+            "first_name": "Emmanuel",
+            "middle_name": "Chukwuemeka",
+            "last_name": "Ezenwa",
+            "email": "emmanuel.ezenwa@example.com",
+            "phone": "+234 806 555 6666",
+            "hometown": "Onitsha",
+            "hometown_parish": "Our Lady of Peace, Onitsha",
+            "residential_address": "No. 3 Eke Road, Onitsha, Anambra State",
+            "permanent_address": "Umuahia, Abia State",
+            "status": "active",
+            "registered_at": "2025-10-12 09:15:00"
+        }
+    ],
+    "payments": [
+        {
+            "id": 1,
+            "member_id": 1,
+            "type": "annual_due",
+            "year": 2024,
+            "expected": 1000,
+            "paid": 1000,
+            "note": "",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 2,
+            "member_id": 1,
+            "type": "annual_due",
+            "year": 2025,
+            "expected": 1000,
+            "paid": 1000,
+            "note": "",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 3,
+            "member_id": 1,
+            "type": "annual_due",
+            "year": 2026,
+            "expected": 1000,
+            "paid": 0,
+            "note": "Awaiting payment",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 4,
+            "member_id": 1,
+            "type": "financial_presence",
+            "year": 2025,
+            "expected": 500,
+            "paid": 500,
+            "note": "AGM 31 Dec 2025",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 5,
+            "member_id": 1,
+            "type": "burial_contribution",
+            "year": 2025,
+            "expected": 5000,
+            "paid": 5000,
+            "note": "Bereavement support, Nov 2025",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 6,
+            "member_id": 2,
+            "type": "annual_due",
+            "year": 2024,
+            "expected": 1000,
+            "paid": 1000,
+            "note": "",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 7,
+            "member_id": 2,
+            "type": "annual_due",
+            "year": 2025,
+            "expected": 1000,
+            "paid": 500,
+            "note": "Partial payment",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 8,
+            "member_id": 2,
+            "type": "annual_due",
+            "year": 2026,
+            "expected": 1000,
+            "paid": 0,
+            "note": "Awaiting payment",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 9,
+            "member_id": 2,
+            "type": "financial_presence",
+            "year": 2025,
+            "expected": 500,
+            "paid": 0,
+            "note": "Absent from AGM",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 10,
+            "member_id": 3,
+            "type": "annual_due",
+            "year": 2024,
+            "expected": 1000,
+            "paid": 0,
+            "note": "Reminder sent",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 11,
+            "member_id": 3,
+            "type": "annual_due",
+            "year": 2025,
+            "expected": 1000,
+            "paid": 1000,
+            "note": "",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 12,
+            "member_id": 3,
+            "type": "annual_due",
+            "year": 2026,
+            "expected": 1000,
+            "paid": 1000,
+            "note": "",
+            "updated_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 13,
+            "member_id": 3,
+            "type": "wedding_contribution",
+            "year": 2025,
+            "expected": 5000,
+            "paid": 2500,
+            "note": "Marriage of a member's daughter, Dec 2025",
+            "updated_at": "2026-08-31 15:17:06"
+        }
+    ],
+    "news": [
+        {
+            "id": 1,
+            "title": "Annual General Meeting Held Successfully as the Constitution Directs",
+            "body": "Members of the Savio Bosco Alphas 2012 association gathered on 31 December 2025 for the Annual General Meeting, in line with the provision of our constitution that the AGM shall be held on the 31st of December every year.\n\nThe Financial Secretary presented the financial report for 2025, which was debated and adopted by show of hands. The minutes of the previous meeting were also read and approved.\n\nMembers were reminded that the annual due must be paid before the end of September each year, and that being financially up to date entitles a member to vote, to be voted for, and to the benevolent benefits of the association.\n\nThe new executive officers were sworn in and expressed gratitude to the members for their confidence. The meeting closed with a word of prayer and fellowship.",
+            "image": "seed-agm.jpg",
+            "date": "2026-01-12",
+            "created_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 2,
+            "title": "Alphas 2012 Swears In New Executive Officers for 2026–2027",
+            "body": "At the Annual General Meeting held on 31 December 2025, new executive officers were elected to lead the association for a two-year term, in line with our constitution.\n\nThe officers — President, Vice President, Secretary, Assistant Secretary, Financial Secretary, Treasurer, Provost and Public Relations Officer — pledged to serve the members with integrity, to keep the brotherhood alive, and to uphold the aims and objectives of the association.\n\nThe association thanks every member who participated in the voting process. May we continue to dwell together in unity — in word, in deed and in prayer.",
+            "image": "seed-alumni.jpg",
+            "date": "2026-01-15",
+            "created_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 3,
+            "title": "Benevolent Visit Made to a Bereaved Family",
+            "body": "Consistent with the benevolent spirit of our constitution, the association paid a condolence visit to the family of a member on the recent bereavement of a direct family member.\n\nAs the constitution provides, the association presented the customary cash gift to the family and to the member, and stood with the family in prayer and in fellowship.\n\nThe executives reminded members that these benefits are available to members who are financially up to date with the association. The annual due remains due before the end of September each year.",
+            "image": "seed-chapel.jpg",
+            "date": "2025-11-20",
+            "created_at": "2026-08-31 15:17:06"
+        }
+    ],
+    "blogs": [
+        {
+            "id": 1,
+            "title": "What the Seminary Taught Us That the World Cannot",
+            "excerpt": "Discipline, faith and brotherhood: the lessons of our years at Akpu that outlast our time there.",
+            "body": "When we think back to our first day at St. Dominic Savio Seminary, Akpu in 2006, as JSS 1 students walking into a new world, most of us were still discovering who we were.\n\nWhat we found at the seminary was a family. The chapel at dawn, the discipline of the class, the long discussions in the compound and the prayers that carried us through examinations — these did not only form our minds, they formed our character.\n\nYears later, scattered across parishes and states, what keeps the Alphas 2012 together is the conviction that we were shaped together. The seminary gave us a discipline the world cannot teach, and a brotherhood the world cannot buy.\n\nRegister on this website, keep your dues current, and let us continue to dwell together in unity — in word, in deed and in prayer.",
+            "author": "Henry C. Nwankwo",
+            "image": "seed-seminary.jpg",
+            "date": "2025-09-14",
+            "created_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 2,
+            "title": "Brotherhood Beyond the Walls: Staying Connected as Alphas",
+            "excerpt": "The seminary walls ended, but the brotherhood did not. Here is how we keep the bond alive.",
+            "body": "An association is only as alive as its members. Our constitution is very clear: the association exists to develop and maintain good and cordial relationships among members, to give every member an identity, and to lend a helping hand — financially and otherwise.\n\nTo make that work, we ask every member to do three simple things. First, register your details on this website so the association can identify you and reach you. Second, keep your annual due current so that you may vote, be voted for, and access the benevolent benefits of the brotherhood. Third, show up — physically or financially — to the Annual General Meeting on 31 December.\n\nWhen one of us marries, is ordained, falls ill or mourns, it is the whole family that walks. Let us make sure that when that day comes, the Alphas 2012 are standing together.",
+            "author": "Paschal I. Okoyeocha",
+            "image": "seed-alumni.jpg",
+            "date": "2025-12-02",
+            "created_at": "2026-08-31 15:17:06"
+        }
+    ],
+    "gallery": [
+        {
+            "id": 1,
+            "title": "St. Dominic Savio Seminary, Akpu",
+            "caption": "Our seminary home in Orumba South",
+            "image": "seed-seminary.jpg",
+            "event_year": 2006,
+            "created_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 2,
+            "title": "Worship in the Chapel",
+            "caption": "The faith that shaped us",
+            "image": "seed-chapel.jpg",
+            "event_year": 2012,
+            "created_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 3,
+            "title": "Class Reunion at the Seminary",
+            "caption": "Alphas 2012 gathered again",
+            "image": "seed-alumni.jpg",
+            "event_year": 2025,
+            "created_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 4,
+            "title": "Annual General Meeting",
+            "caption": "AGM session, 31 December 2025",
+            "image": "seed-agm.jpg",
+            "event_year": 2025,
+            "created_at": "2026-08-31 15:17:06"
+        }
+    ],
+    "documents": [
+        {
+            "id": 1,
+            "type": "constitution",
+            "year": 2012,
+            "title": "Constitution of the Savio Bosco Alphas 2012 Association",
+            "filename": "constitution.pdf",
+            "text": "A PROPOSED CONSTITUTION FOR THE “CLASS\nOF 2012”, ST. JOHNBOSCO SEMINARY,\nISUANIOCHA\nPREAMBLE:\nWe, the members of the Class of 2012, St. John Bosco Seminary Isuaniocha , having\nresolved to exist in unity and harmony as one indivisible and indissoluble\nassociation, and to provide a constitution for the purpose of promoting the good\ngovernment and welfare of all persons in the association, on the principles of love,\njustice, equality and fairness, and for the purpose of consolidating the unity we\nprofess, do hereby make, enact and give to ourselves the following constitution:-\nPART ONE:\nSection One:\n1. NAME: The association shall be known  and addressed as Bosco Class of\n2012\n\nSection Two:\n1. AIMS AND OBJECTIVES:\nThe aims and objectives of the association shall include:\na. To act as a medium through which good and cordial relationship is\ndeveloped and maintained among members.\nb. To give identity to and identify with every member of the association\nalways.\nc. To lend helping hands to members, financially and otherwise.\nd. To encourage the goodwill and active participation of all members.\ne. To act as a midwife for the all round development of members as good\ncitizens of Nigeria and ambassadors of the Church\n\n2. POWERS:\n\nIn furtherance of the objectives, but not otherwise, we state that:-\na. The power of the association resides primarily with the general assembly,\nhereinafter, known as the members of the association.\nb. The executives are elected from and are answerable to the members of the\nassociation.\nc. The executives albeit, reserve the power to:-\ni. Publicize and promote the work of the association and organ ize the\nAnnual General Meetings, training courses, events and seminars, etc.\nii. Invite and receive contributi ons, and raise funds where appropriate,\nto finance the work of the association, and to open a bank account to\nmanage such funds\niii. Work with associations and associations of a similar nature and\nexchange information, advice and knowledge with them, including\ncooperation with other voluntary bodies, charities, statutory and non-\nstatutory organizations.\niv. Appoint or set up committees as are necessary to conduct activities\nto meet the objectives,\nv. Take any form of action that it lawful, which is necessary to achieve\nthe objectives of the association.\nvi. Give out loans and other forms of help to members, albeit,\nregulatory.\n\n  Section Three:\n1. MEMBERSHIP:\n\na. Membership shall be open to anyone who entered St. Dominic Savio\nSeminary, Akpu in the year 2006, as a  freshman (JSS 1 student) and has\neither continued with the set, or left the seminary without joining another\nset.\nb. Membership shall also be open to persons that joined the seminary\ndebutants of 2006 thereafter.\nc. It shall also, in case of any marriage valid before the law and the Church ,\nbe extended to the spouse of the member, by virtue of association.\nd. Where it is considered that membership will be detrimental to the aims and\nobjectives of the association , the executives shall have the power to refuse\nmembership to applicants.\ne. The management committee may, by resolution passed at a meeting\nthereof, terminate or suspend the membership of any member, if in its\nopinion, his/her conduct is prejudicial to the interests and objectives of the\nassociation, PROVIDED THAT  the individual member shall have the\nright to be heard by the general assembly before the final decision is made.\nf. Any member of the association may resign his/her membership by\nproviding the association via the Secretary with a written notice.\n\nPART TWO:\nSection One:\n1. MANAGEMENT COMMITTEE:\n The association shall be administered by a management committee of not less\nthan three (3) perso ns and not more than fifteen (15) persons, who prior to\ntheir election, must be financially up to date with the association. The\nexecutives shall be elected for a period of two (2) years, but may be re -elected\nat the association’s Annual General Meeting.\n\n2. EXECUTIVES:\na. The association shall have a management committee consisting of:\ni. President\nii. Vice President\niii. Secretary\niv. Assistant Secretary\nv. Financial Secretary\nvi. Treasurer\nvii. Provost\nviii. Public Relations Officer\n\n3. FUNCTIONS OF THE EXECUTIVES:\na. THE PRESIDENT shall:\ni. Function as the leader of the association, and the head of the\nmanagement committee.\nii. Preside over the Annual General Meeting and in any case, all other\nactivities of the association.\niii. Arrange for all meetings.\niv. Set up and inaugurate sub-committees and panels.\nv. Be one of the signatories to the association’s bank account.\nvi. In matters of contention, have the final say.\nvii. Take decisions on behalf of the association, in the face of pressing\nmatters and act as official representative of the association to outside\npersons and agencies.\nviii. Offer assistance in an advisory capacity when necessary to other\nexecutive members\nix. Sign all official documents and papers on behalf of the association.\nx. Establish quorum when necessary.\n\nb. THE VICE PRESIDENT shall:\ni. Act in the place of the President, in the absence or incapacity of the\nPresident.\nii. Work together with the President and executives.\niii. Gather current data (address, phone numbers) on executive members\nannually and distribute to the executive members and committee heads.\niv. In conjunction with the organizers, arrange the meeting place.\n\nc. THE SECRETARY shall:\ni. Be the custodian of those records specifically assigned which include:\n• The minutes of all Executive Committee and Annual General\nMeetings\n• The minutes of all Standing Committees and Special Committees.\nii. Record the minutes of all general and executive meetings.\niii. Read all papers that may be called for by the meeting.\niv. Be responsible for giving notice of meetings and circulating facts and\nminutes of all proceedings to the executive.\nv. Be responsible for corresponding with individuals or organizations.\n\nd. THE ASSISTANT SECRETARY shall:\ni. Keep roll of members present at meetings and call roll when required.\nii. Stand in for the Secretary when absent or incapacitated.\n\ne. THE FINANCIAL SECRETARY shall:\ni. Keep accurate record of all financial transactions of the association.\nii. Receive funds.\niii. Issue receipts of membership fees to members.\niv. Submit a financial report at each Annual General Meeting of the\nassociation.\nv. Be one of the signatories to the association’s bank account.\nvi. In conjunction with the President  and Treasurer, draft the association\nbudget.\n\nf. THE TREASURER shall:\ni. Keep all cash assets of the association.\nii. Make expenses on behalf of the association.\niii. Keep accurate record of the financial transactions of the association.\niv. Liaise with the Financial Secretary  and President in drafting the\nassociation’s budget.\nv. Be one of the signatories to the association’s bank account.\nvi. Approve the financial report before it is read at each Annual General\nMeeting.\n\ng. THE PROVOST shall:\ni. Maintain decorum in the meeting place.\nii. Penalize offenders and collect their fines accordingly.\niii. Be the returning officer on any in-house voting.\n\nh. THE PUBLIC RELATIONS OFFICER shall:\ni. Be in charge of circulation of memo and notices within the association.\nii. Shall be the liaison between the association, relevant agencies and\nnews media.\nSection Two:\n1. MEETINGS:\ni. There shall be an Annual General Meeting on the 31 st of December, every\nyear, unless otherwise stated.\nii. Meetings shall enable members to discuss actions and monitor progress to\ndate, and to consider future developments.\niii. All members shall be given at least fourteen (14) days’ notice  of when a\nmeeting is due to take place.\niv. It shall be the responsibility of the President to chair all meetings, or in his\nabsence, the Vice President or any other designated deputy.\nv. All members are entitled to vote at the Annual General Meeting. Voting\nshall be made by a show of hands on a majority basis. In the case of a tied\nvote, the President or an appointed deputy shall make the final decision.\nvi. One is considered late for a meeting if he comes after the minutes might\nhave been read.\nvii. One is considered absent from the meeting if he comes after the exhaustion\nof the day’s agenda.\n\n2. FINANCE:\ni. Any money acquired by the association  including donations, contributions\nand bequests, shall be paid into an account operated by the management\ncommittee in the name of the association.\nii. Any money obtained by the association shall be used only for the\nassociation.\niii. Only one bank account shall be opened in the name of the association, and\nthat shall be with the United Bank of Africa (UBA).\niv. Every member of the association shall pay an annual due of N1000 before\nthe end of September, each year.\nv. At every Annual General Meeting, a sum of N 500 will be paid as an\nappearance fee. N200 shall b e charged for absenteeism, N100 will be\ncharged for lateness, while N50 will be charged for noisemaking.\nvi. The signatories to the  bank account shall include the President , the\nFinancial Secretary and the Treasurer.\nvii. Any income or expenditure shall be the responsibility of the Treasurer who\nwill be accountable to ensure funds are utilized effectively and that the\nassociation stays within the budget.\nviii. An annual financial report shall be presented at the Annual General\nMeeting.\n\n3. BENEFITS:\n    The members shall be entitled to the following benefits, as and at when due:\ni. Right to vote and be voted for GIVEN THAT he or she is financially up to\ndate with the association.\nii. On cases of serious illness of a financially up-to-date member made known\nto the association, a visit of the association, with a cash gift of N 2000,\nunless otherwise agreed by the executives.\niii. On cases of direct bereavement of a financially up- to-date member, a visit\nof the association with a cash gift of N5000 unless otherwise agreed by the\nexecutives.\niv. On cases of ordination, religious profession, marriage ceremony and\nanniversary of financially up- to-date members, a visit of the association\nwith a cash gift of N5000\n4. MISCELLANEOUS:\ni. The association shall be represented at every event of a member, in\nwhich she is officially invited.\nii. In the case of the bereavement of a direct family member of a member\nof the association, a cash gift of N1000 shall be presented to the family,\nand N 4,000 presented to the member.\niii. In the case of a major sickness of any member, the association shall\nvisit the said member with a cash gift of N 2,000.\niv. The above mentioned privileges are only for those who do not owe  the\nassociation in any way.\n\nPART THREE\nSection One:\n1. AMENDMENT OF CONSTITUTION:\ni. Any change to this constitution must be agreed by a majority vote at\nan Annual General Meeting.\nii. Amendments to this constitution or dissolution of the association\nmust be conveyed to the Secretary formally in writing. The Secretary\nand other executives shall then present it to the AGM to discuss such\nproposals.\n\n2. DISSOLUTION OF THE ASSOCIATION:\ni. The association may be dissolved if deemed necessary by the\nmembers in a majority vote at a special meeting. Any assets or\nremaining funds after debts have been paid shall be returned to the\nproviders or transferred to local charities or similar groups at the\ndiscretion of the Management Committee.\nThis constitution was adopted at an AGM held at\n…………………………………………………………………..on...…\n………………………………\n\nSIGNED\n\n_______________________    ____________________\n\nNWANKWO, HENRY .C    EZEAGU, HILARY .C\n SECRETARY            MEMBER, CONST. COMMITTEE\n\n_______________________    ____________________\n\nEZENWA, EMMANUEL I.    OKOYEOCHA, PASCHAL I.\nCHAIRMAN, CONST. COMMITTEE   PRESIDENT",
+            "uploaded_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 2,
+            "type": "minutes",
+            "year": 2025,
+            "title": "Minutes of the AGM — 31 December 2025 (sample)",
+            "filename": null,
+            "text": "MINUTES OF THE ANNUAL GENERAL MEETING OF SAVIO BOSCO ALPHAS 2012\nHeld on 31 December 2025 (sample record)\n\n1. The meeting was called to order by the President after the opening prayer.\n2. The attendance of members was recorded. Quorum was established.\n3. The minutes of the previous meeting were read, debated and approved.\n4. The report of the Secretary was presented and adopted.\n5. The Financial Secretary presented the financial report for the year 2025; it was debated and approved by the members.\n6. New executive officers were elected for a two-year term and were sworn in.\n7. Members were reminded that the annual due must be paid before the end of September each year, and that voting rights are reserved for members who are financially up to date.\n8. There being no other business, the meeting closed with the closing prayer.\n\nSigned:  Secretary ..........................  President ..........................",
+            "uploaded_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 3,
+            "type": "minutes",
+            "year": 2024,
+            "title": "Minutes of the AGM — 31 December 2024 (sample)",
+            "filename": null,
+            "text": "MINUTES OF THE ANNUAL GENERAL MEETING OF SAVIO BOSCO ALPHAS 2012\nHeld on 31 December 2024 (sample record)\n\n1. The meeting was held at the seminary hall and was presided over by the President.\n2. The minutes of the previous meeting were approved.\n3. The financial report for 2024 was presented, debated and adopted.\n4. Members were reminded of the annual due and the appearance fee for the AGM.\n5. The meeting closed with the closing prayer.",
+            "uploaded_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 4,
+            "type": "financial_report",
+            "year": 2025,
+            "title": "Annual Financial Report — 2025 (sample)",
+            "filename": null,
+            "text": "ANNUAL FINANCIAL REPORT — 2025 (sample)\n\nINCOME\nAnnual dues (members current as at year end) ........... ₦ 4,500\nAGM appearance fees .................................... ₦ 1,000\nDonations and other income ............................. ₦ 1,500\nTOTAL INCOME ........................................... ₦ 7,000\n\nEXPENDITURE\nBereavement and benevolent visits ...................... ₦ 5,000\nMeeting logistics and refreshments ..................... ₦ 1,200\nPrinting and stationery ................................ ₦ 400\nTOTAL EXPENDITURE ...................................... ₦ 6,600\n\nBALANCE CARRIED FORWARD ................................ ₦ 400\n\nCertified as true and fair:\nFinancial Secretary ........................  Treasurer ........................  President ........................",
+            "uploaded_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 5,
+            "type": "financial_report",
+            "year": 2024,
+            "title": "Annual Financial Report — 2024 (sample)",
+            "filename": null,
+            "text": "ANNUAL FINANCIAL REPORT — 2024 (sample)\n\nINCOME\nAnnual dues ............................................ ₦ 3,800\nAGM appearance fees .................................... ₦ 900\nTOTAL INCOME ........................................... ₦ 4,700\n\nEXPENDITURE\nBereavement support .................................... ₦ 3,500\nMeeting logistics ...................................... ₦ 700\nTOTAL EXPENDITURE ...................................... ₦ 4,200\n\nBALANCE CARRIED FORWARD ................................ ₦ 500",
+            "uploaded_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 6,
+            "type": "attendance",
+            "year": 2025,
+            "title": "AGM Attendance Record — 2025 (sample)",
+            "filename": null,
+            "text": "ATTENDANCE RECORD — AGM, 31 DECEMBER 2025 (sample)\n\nPresent: 18 members\nAbsent with apologies: 6 members\nAbsent without notice: 3 members\nLate: 2 members (late charge of ₦100 applied per the constitution)\n\nThe full roll is kept by the Assistant Secretary.",
+            "uploaded_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 7,
+            "type": "attendance",
+            "year": 2024,
+            "title": "AGM Attendance Record — 2024 (sample)",
+            "filename": null,
+            "text": "ATTENDANCE RECORD — AGM, 31 DECEMBER 2024 (sample)\n\nPresent: 15 members\nAbsent with apologies: 7 members\nAbsent without notice: 5 members\n\nThe full roll is kept by the Assistant Secretary.",
+            "uploaded_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 8,
+            "type": "financial_presence",
+            "year": 2025,
+            "title": "Financial Presence Record — AGM 2025 (sample)",
+            "filename": null,
+            "text": "FINANCIAL PRESENCE RECORD — AGM 2025 (sample)\n\nPer the constitution, ₦500 is paid as an appearance fee at every Annual General Meeting.\n\nMembers who paid the appearance fee: 18\nMembers absent (₦200 charge applied): 9\nTotal collected: ₦ 5,300\n\nThe Financial Secretary keeps the detailed register.",
+            "uploaded_at": "2026-08-31 15:17:06"
+        },
+        {
+            "id": 9,
+            "type": "financial_presence",
+            "year": 2024,
+            "title": "Financial Presence Record — AGM 2024 (sample)",
+            "filename": null,
+            "text": "FINANCIAL PRESENCE RECORD — AGM 2024 (sample)\n\nMembers who paid the ₦500 appearance fee: 15\nMembers absent (₦200 charge applied): 12\nTotal collected: ₦ 4,400",
+            "uploaded_at": "2026-08-31 15:17:06"
+        }
+    ],
+    "messages": [],
+    "settings": []
+}

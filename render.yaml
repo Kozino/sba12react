@@ -1,0 +1,29 @@
+# Render blueprint — creates the API service from this repo.
+# Render dashboard → New → Blueprint → select this repo.
+services:
+  - type: web
+    name: sba2012-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Generated automatically by Render (long random string)
+      - key: JWT_SECRET
+        generateValue: true
+      # Fill these in the Render dashboard after creating the Supabase project
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: "false"
+      - key: SUPABASE_BUCKET
+        value: uploads
