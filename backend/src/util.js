@@ -52,6 +52,25 @@ function yearInt(v, fallback) {
   return Number.isInteger(n) && n >= 1900 && n <= 2100 ? n : (fallback || new Date().getFullYear());
 }
 
+/** Turn a database error into an actionable, user-safe message. */
+function dbErrorMessage(err) {
+  const code = (err && err.code) || '';
+  const m = (err && err.message) || '';
+  if (['ECONNREFUSED', 'ETIMEDOUT', 'ECONNRESET', 'ENOTFOUND', 'EAI_AGAIN'].includes(code)) {
+    return 'The API cannot reach the database. Check DATABASE_URL in Render — use the Supabase DIRECT connection string (host db.<ref>.supabase.co).';
+  }
+  if (code === '28P01' || code === '28000') {
+    return 'Database authentication failed — check the password inside DATABASE_URL.';
+  }
+  if (code === '3D000') {
+    return 'Database not found — the database name in DATABASE_URL should normally be "postgres".';
+  }
+  if (code === '08006' || code === '57P01' || /SSL|TLS|certificate/i.test(m)) {
+    return 'Database connection failed (likely SSL). Set DATABASE_SSL=true in Render, or use the DIRECT connection string.';
+  }
+  return 'Something went wrong on the server. Please try again.';
+}
+
 module.exports = {
   generateUniqueId,
   PAYMENT_TYPES,
@@ -60,4 +79,5 @@ module.exports = {
   validPhone,
   paymentStatus,
   yearInt,
+  dbErrorMessage,
 };
