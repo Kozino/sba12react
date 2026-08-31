@@ -12,12 +12,41 @@ const adminRoutes = require('./src/routes/admin');
 const app = express();
 app.disable('x-powered-by');
 
-const FRONTEND_URL = (process.env.FRONTEND_URL || '').trim();
+const FRONTEND_URLS = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map((s) => s.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
+function originAllowed(origin) {
+  if (!origin) return true; // same-origin or non-browser client
+  if (FRONTEND_URLS.includes(origin)) return true; // exact (trailing-slash-insensitive)
+  let host;
+  try {
+    host = new URL(origin).hostname;
+  } catch {
+    return false;
+  }
+  if (host === 'localhost' || host === '127.0.0.1') return true; // local dev
+  // Any Netlify origin (main deploys + preview deploys)
+  return (
+    host.endsWith('.netlify.app') ||
+    host.endsWith('.netlify.site') ||
+    host === 'netlify.app' ||
+    host === 'netlify.site'
+  );
+}
+
 app.use(
   cors({
-    origin: FRONTEND_URL
-      ? [FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173']
-      : true,
+    origin: (origin, callback) => {
+      let ok = false;
+      try {
+        ok = originAllowed(origin);
+      } catch {
+        ok = false; // malformed origin
+      }
+      callback(null, ok); // when ok, the requesting origin is reflected
+    },
   })
 );
 app.use(express.json({ limit: '10mb' }));
