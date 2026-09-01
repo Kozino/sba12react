@@ -23,6 +23,7 @@ import PaymentsPage from "./pages/admin/Payments";
 import NewsAdminPage from "./pages/admin/News";
 import BlogsAdminPage from "./pages/admin/Blogs";
 import GalleryAdminPage from "./pages/admin/GalleryAdmin";
+import GalleryAdminPage from "./pages/admin/AdminExecutives";
 import DocumentsPage from "./pages/admin/Documents";
 import MessagesPage from "./pages/admin/Messages";
 import SettingsPage from "./pages/admin/Settings";
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="content/news" element={<NewsAdminPage />} />
             <Route path="content/blogs" element={<BlogsAdminPage />} />
             <Route path="content/gallery" element={<GalleryAdminPage />} />
+             <Route path="executives" element={<AdminExecutivesPage />} />
             <Route path="documents" element={<DocumentsPage />} />
             <Route path="messages" element={<MessagesPage />} />
             <Route path="settings" element={<SettingsPage />} />
