@@ -34,7 +34,9 @@ export default function HomePage() {
     <>
       {/* Hero */}
       <section className="page-hero">
-        <div className="container-site relative z-10 grid items-center gap-10 py-16 lg:grid-cols-[1.2fr_1fr] lg:py-24">
+        <ImageMarquee images={HERO_MARQUEE_IMAGES} secondsPerImage={2} />
+        <div className="page-hero-overlay" />
+        <div className="container-site relative z-20 max-w-2xl py-16 lg:py-24">
           <div>
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/40 bg-gold-400/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-gold-300">
               <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
@@ -67,16 +69,6 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="flex justify-center">
-            <img
-              src="/logo.png"
-              alt="Savio Bosco Alphas 2012 emblem"
-              className="w-64 drop-shadow-2xl sm:w-80 lg:w-96"
-            />
-          </div>
-        </div>
-        <div className="container-site relative z-10 pb-16 lg:pb-24">
-          <ImageMarquee images={HERO_MARQUEE_IMAGES} secondsPerImage={2} />
         </div>
       </section>
 
