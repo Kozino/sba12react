@@ -9,7 +9,7 @@ export const SITE = {
   email: "info@savioboscoalphas.org",
   phone: "+234 803 000 0000",
   address:
-    "St. Dominic Savio Seminary, Akpu, Orumba South LGA, Anambra State, Nigeria"
+    "Anambra State, Nigeria"
 };
 
 export const PAYMENT_TYPES = [
