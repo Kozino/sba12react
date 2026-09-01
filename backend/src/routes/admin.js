@@ -439,6 +439,80 @@ router.delete(
   })
 );
 
+
+
+// ---- executives ----
+router.get(
+  '/executives',
+  aw(async (req, res) => {
+    const rows = await q('SELECT * FROM executives ORDER BY sort_order ASC, id ASC');
+    res.json({ executives: rows });
+  })
+);
+router.post(
+  '/executives',
+  upload.any(),
+  aw(async (req, res) => {
+    const { fields, file } = multipart(req);
+    if (!String(fields.name ?? '').trim())
+      return res.status(400).json({ error: 'Name is required.' });
+    if (!String(fields.position ?? '').trim())
+      return res.status(400).json({ error: 'Position is required.' });
+    let image = '';
+    if (file) {
+      const name = objectName(file.originalname, 'exec');
+      await storeFile(file.buffer, name, file.mimetype || 'application/octet-stream');
+      image = name;
+    }
+    const sortOrder = Number.isFinite(Number(fields.sort_order)) ? Number(fields.sort_order) : 0;
+    const item = await one(
+      `INSERT INTO executives (name, position, image, sort_order) VALUES ($1,$2,$3,$4) RETURNING *`,
+      [String(fields.name).trim(), String(fields.position).trim(), image, sortOrder]
+    );
+    res.status(201).json({ item });
+  })
+);
+router.put(
+  '/executives/:id',
+  upload.any(),
+  aw(async (req, res) => {
+    const { fields, file } = multipart(req);
+    if (!String(fields.name ?? '').trim())
+      return res.status(400).json({ error: 'Name is required.' });
+    if (!String(fields.position ?? '').trim())
+      return res.status(400).json({ error: 'Position is required.' });
+    const existing = await one('SELECT * FROM executives WHERE id = $1', [Number(req.params.id)]);
+    if (!existing) return res.status(404).json({ error: 'Executive not found.' });
+    let image = existing.image;
+    if (file) {
+      const name = objectName(file.originalname, 'exec');
+      await storeFile(file.buffer, name, file.mimetype || 'application/octet-stream');
+      image = name;
+      await deleteFile(existing.image);
+    }
+    const sortOrder =
+      fields.sort_order !== undefined && fields.sort_order !== ''
+        ? Number(fields.sort_order)
+        : existing.sort_order;
+    const item = await one(
+      `UPDATE executives SET name=$1, position=$2, image=$3, sort_order=$4, updated_at=NOW()
+        WHERE id=$5 RETURNING *`,
+      [String(fields.name).trim(), String(fields.position).trim(), image, sortOrder, Number(req.params.id)]
+    );
+    res.json({ item });
+  })
+);
+router.delete(
+  '/executives/:id',
+  aw(async (req, res) => {
+    const item = await one('SELECT * FROM executives WHERE id = $1', [Number(req.params.id)]);
+    if (!item) return res.status(404).json({ error: 'Executive not found.' });
+    await q('DELETE FROM executives WHERE id = $1', [item.id]);
+    await deleteFile(item.image);
+    res.json({ ok: true });
+  })
+);
+
 /* ---------------- Documents (multipart) ---------------- */
 
 router.get(
