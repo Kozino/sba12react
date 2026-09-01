@@ -10,7 +10,7 @@ const {
   dbErrorMessage,
 } = require('../util');
 
- const { CONSTITUTION_TEXT } = require('../constitution');
+const { CONSTITUTION_TEXT } = require('../constitution');
 const router = express.Router();
 
 const fullName = (m) =>
@@ -67,84 +67,151 @@ router.get('/executives', async (req, res) => {
   res.json({ executives: rows });
 });
 
+/* ---------------- Chatbot (constitution + live site data Q&A) ---------------- */
 
-/* ---------------- Chatbot (constitution Q&A) ---------------- */
+const chatHits = new Map();
+function rateLimited(ip) {
+  const now = Date.now();
+  const windowMs = 10 * 60 * 1000;
+  const entry = chatHits.get(ip) || { count: 0, resetAt: now + windowMs };
+  if (now > entry.resetAt) {
+    entry.count = 0;
+    entry.resetAt = now + windowMs;
+  }
+  entry.count += 1;
+  chatHits.set(ip, entry);
+  return entry.count > 15;
+}
 
- const chatHits = new Map();
- function rateLimited(ip) {
-   const now = Date.now();
-   const windowMs = 10 * 60 * 1000;
-     const entry = chatHits.get(ip) || { count: 0, resetAt: now + windowMs };
-   if (now > entry.resetAt) {
-     entry.count = 0;
-     entry.resetAt = now + windowMs;
-   }
-   entry.count += 1;
-   chatHits.set(ip, entry);
-   return entry.count > 15;
- }
+// Cache DB-derived context so we're not hitting the database on every message.
+// Bump SITE_CONTEXT_TTL_MS down (or clear siteContextCache.expiresAt = 0 from
+// your admin update routes) if you want executive/news/gallery edits to show
+// up in the chatbot immediately instead of waiting for the cache to expire.
+const SITE_CONTEXT_TTL_MS = 10 * 60 * 1000; // 10 minutes
+let siteContextCache = { text: null, expiresAt: 0 };
 
- const SYSTEM_PROMPT = `You are the assistant for the Bosco Class of 2012 (SBA 2012) website. Answer questions ONLY using the constitution text provided below. If the answer isn't in the constitution, say so plainly and suggest the person contact the association's executives — do not guess or make anything up. Keep answers concise and friendly, in plain English. Do not mention that you were given a document; just answer naturally as the association's assistant.
+function fmtDate(d) {
+  if (!d) return '';
+  try {
+    return new Date(d).toISOString().slice(0, 10);
+  } catch {
+    return String(d);
+  }
+}
 
- CONSTITUTION:
- ${CONSTITUTION_TEXT}`;
+// news.body may contain HTML and can be long — strip tags and truncate to a
+// short snippet so the prompt stays compact.
+function snippet(html, maxLen = 200) {
+  if (!html) return '';
+  const text = String(html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return text.length > maxLen ? text.slice(0, maxLen).trim() + '…' : text;
+}
 
- router.post('/chat', async (req, res) => {
+async function getSiteContext() {
+  const now = Date.now();
+  if (siteContextCache.text && now < siteContextCache.expiresAt) {
+    return siteContextCache.text;
+  }
+
+  const [executives, settingsRows, memberCount, news, gallery] = await Promise.all([
+    q('SELECT name, position FROM executives ORDER BY sort_order ASC, id ASC'),
+    q('SELECT key, value FROM settings'),
+    one('SELECT COUNT(*)::int AS c FROM members'),
+    q('SELECT title, date, body FROM news ORDER BY date DESC, id DESC LIMIT 8'),
+    q('SELECT title, event_year FROM gallery ORDER BY event_year DESC, id DESC LIMIT 15'),
+  ]);
+
+  const settings = {};
+  for (const r of settingsRows) settings[r.key] = r.value;
+
+  const execLines = executives.length
+    ? executives.map((e) => `- ${e.position}: ${e.name}`).join('\n')
+    : 'No executives are currently listed on the site.';
+
+  const newsLines = news.length
+    ? news
+        .map((n) => {
+          const s = snippet(n.body);
+          return `- [${fmtDate(n.date)}] ${n.title}${s ? ` — ${s}` : ''}`;
+        })
+        .join('\n')
+    : 'No news items are currently posted.';
+
+  const galleryLines = gallery.length
+    ? gallery.map((g) => `- ${g.title} (${g.event_year})`).join('\n')
+    : 'No gallery events are currently listed.';
+
+  const text = `
+CURRENT EXECUTIVES:
+${execLines}
+
+CONTACT INFO:
+Email: ${settings.contact_email || 'info@savioboscoalphas.org'}
+Phone: ${settings.contact_phone || '+234 803 000 0000'}
+Address: ${settings.contact_address || 'St. Dominic Savio Seminary, Akpu, Orumba South LGA, Anambra State, Nigeria'}
+
+MEMBERSHIP: The association currently has ${memberCount.c} registered members.
+
+RECENT NEWS (most recent first):
+${newsLines}
+
+GALLERY / PAST EVENTS:
+${galleryLines}
+`.trim();
+
+  siteContextCache = { text, expiresAt: now + SITE_CONTEXT_TTL_MS };
+  return text;
+}
+
+function buildSystemPrompt(siteContext) {
+  return `You are the assistant for the Bosco Class of 2012 (SBA 2012) website. Answer questions using the constitution text and the current site information provided below. If the answer isn't in either, say so plainly and suggest the person contact the association's executives — do not guess or make anything up. Keep answers concise and friendly, in plain English. Do not mention that you were given documents or data; just answer naturally as the association's assistant.
+
+CONSTITUTION:
+${CONSTITUTION_TEXT}
+
+${siteContext}`;
+}
+
+router.post('/chat', async (req, res) => {
   const question = String((req.body || {}).message || '').trim();
-   if (!question) return res.status(400).json({ error: 'Please enter a question.' });
-   if (question.length > 500)
-     return res.status(400).json({ error: 'Please keep your question under 500 characters.' });
+  if (!question) return res.status(400).json({ error: 'Please enter a question.' });
+  if (question.length > 500)
+    return res.status(400).json({ error: 'Please keep your question under 500 characters.' });
 
-   const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip;
-   if (rateLimited(ip)) {
-     return res.status(429).json({ error: 'Too many questions — please try again in a few minutes.' });
-   }
+  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip;
+  if (rateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many questions — please try again in a few minutes.' });
+  }
 
-   try {
-     const apiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-       method: 'POST',
-       headers: {
-         'Content-Type': 'application/json',
-         Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-       },
-       body: JSON.stringify({
-         model: 'openai/gpt-oss-20b',
-         max_tokens: 600,
-         messages: [
-           { role: 'system', content: SYSTEM_PROMPT },
-           { role: 'user', content: question },
-         ],
-       }),
-     });
-     const data = await apiRes.json();
-     if (!apiRes.ok) {
-       console.error('Groq API error:', data);
-       return res.status(502).json({ error: 'The assistant is temporarily unavailable. Please try again shortly.' });
-     }
-     const answer = data.choices?.[0]?.message?.content?.trim();
-     res.json({ answer: answer || "Sorry, I couldn't find an answer to that." });
-   } catch (e) {
-     console.error(e);
-     res.status(502).json({ error: 'The assistant is temporarily unavailable. Please try again shortly.' });
-   }
- });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  try {
+    const siteContext = await getSiteContext();
+    const apiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-oss-20b',
+        max_tokens: 600,
+        messages: [
+          { role: 'system', content: buildSystemPrompt(siteContext) },
+          { role: 'user', content: question },
+        ],
+      }),
+    });
+    const data = await apiRes.json();
+    if (!apiRes.ok) {
+      console.error('Groq API error:', data);
+      return res.status(502).json({ error: 'The assistant is temporarily unavailable. Please try again shortly.' });
+    }
+    const answer = data.choices?.[0]?.message?.content?.trim();
+    res.json({ answer: answer || "Sorry, I couldn't find an answer to that." });
+  } catch (e) {
+    console.error(e);
+    res.status(502).json({ error: 'The assistant is temporarily unavailable. Please try again shortly.' });
+  }
+});
 
 // Public contact settings (no auth)
 router.get('/settings', async (req, res) => {
