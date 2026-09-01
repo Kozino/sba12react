@@ -23,7 +23,7 @@ import PaymentsPage from "./pages/admin/Payments";
 import NewsAdminPage from "./pages/admin/News";
 import BlogsAdminPage from "./pages/admin/Blogs";
 import GalleryAdminPage from "./pages/admin/GalleryAdmin";
-import GalleryAdminPage from "./pages/admin/AdminExecutives";
+import AdminExecutivesPage from "./pages/admin/AdminExecutives";
 import DocumentsPage from "./pages/admin/Documents";
 import MessagesPage from "./pages/admin/Messages";
 import SettingsPage from "./pages/admin/Settings";
