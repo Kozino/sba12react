@@ -112,6 +112,33 @@ export function DateChip({ date }: { date?: string | null }) {
   );
 }
 
+export function ImageMarquee({
+  images,
+  secondsPerImage = 2,
+}: {
+  images: { src: string; alt: string }[];
+  secondsPerImage?: number;
+}) {
+  const duration = images.length * secondsPerImage;
+  return (
+    <div className="w-full overflow-hidden">
+      <div
+        className="flex w-max animate-marquee gap-6"
+        style={{ animationDuration: `${duration}s` }}
+      >
+        {[...images, ...images].map((img, i) => (
+          <img
+            key={i}
+            src={img.src}
+            alt={img.alt}
+            className="h-40 w-64 flex-none rounded-xl object-cover shadow-xl sm:h-48 sm:w-72"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function CtaBand({
   title,
   text,
