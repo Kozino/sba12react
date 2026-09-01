@@ -69,65 +69,65 @@ router.get('/executives', async (req, res) => {
 
 
 /* ---------------- Chatbot (constitution Q&A) ---------------- */
-+
-+ const chatHits = new Map();
-+ function rateLimited(ip) {
-+   const now = Date.now();
-+   const windowMs = 10 * 60 * 1000;
-+   const entry = chatHits.get(ip) || { count: 0, resetAt: now + windowMs };
-+   if (now > entry.resetAt) {
-+     entry.count = 0;
-+     entry.resetAt = now + windowMs;
-+   }
-+   entry.count += 1;
-+   chatHits.set(ip, entry);
-+   return entry.count > 15;
-+ }
-+
-+ const SYSTEM_PROMPT = `You are the assistant for the Bosco Class of 2012 (SBA 2012) website. Answer questions ONLY using the constitution text provided below. If the answer isn't in the constitution, say so plainly and suggest the person contact the association's executives — do not guess or make anything up. Keep answers concise and friendly, in plain English. Do not mention that you were given a document; just answer naturally as the association's assistant.
-+
-+ CONSTITUTION:
-+ ${CONSTITUTION_TEXT}`;
-+
-+ router.post('/chat', async (req, res) => {
-+   const question = String((req.body || {}).message || '').trim();
-+   if (!question) return res.status(400).json({ error: 'Please enter a question.' });
-+   if (question.length > 500)
-+     return res.status(400).json({ error: 'Please keep your question under 500 characters.' });
-+
-+   const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip;
-+   if (rateLimited(ip)) {
-+     return res.status(429).json({ error: 'Too many questions — please try again in a few minutes.' });
-+   }
-+
-+   try {
-+     const apiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-+       method: 'POST',
-+       headers: {
-+         'Content-Type': 'application/json',
-+         Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-+       },
-+       body: JSON.stringify({
-+         model: 'openai/gpt-oss-20b',
-+         max_tokens: 600,
-+         messages: [
-+           { role: 'system', content: SYSTEM_PROMPT },
-+           { role: 'user', content: question },
-+         ],
-+       }),
-+     });
-+     const data = await apiRes.json();
-+     if (!apiRes.ok) {
-+       console.error('Groq API error:', data);
-+       return res.status(502).json({ error: 'The assistant is temporarily unavailable. Please try again shortly.' });
-+     }
-+     const answer = data.choices?.[0]?.message?.content?.trim();
-+     res.json({ answer: answer || "Sorry, I couldn't find an answer to that." });
-+   } catch (e) {
-+     console.error(e);
-+     res.status(502).json({ error: 'The assistant is temporarily unavailable. Please try again shortly.' });
-+   }
-+ });
+
+ const chatHits = new Map();
+ function rateLimited(ip) {
+   const now = Date.now();
+   const windowMs = 10 * 60 * 1000;
+     const entry = chatHits.get(ip) || { count: 0, resetAt: now + windowMs };
+   if (now > entry.resetAt) {
+     entry.count = 0;
+     entry.resetAt = now + windowMs;
+   }
+   entry.count += 1;
+   chatHits.set(ip, entry);
+   return entry.count > 15;
+ }
+
+ const SYSTEM_PROMPT = `You are the assistant for the Bosco Class of 2012 (SBA 2012) website. Answer questions ONLY using the constitution text provided below. If the answer isn't in the constitution, say so plainly and suggest the person contact the association's executives — do not guess or make anything up. Keep answers concise and friendly, in plain English. Do not mention that you were given a document; just answer naturally as the association's assistant.
+
+ CONSTITUTION:
+ ${CONSTITUTION_TEXT}`;
+
+ router.post('/chat', async (req, res) => {
+  const question = String((req.body || {}).message || '').trim();
+   if (!question) return res.status(400).json({ error: 'Please enter a question.' });
+   if (question.length > 500)
+     return res.status(400).json({ error: 'Please keep your question under 500 characters.' });
+
+   const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip;
+   if (rateLimited(ip)) {
+     return res.status(429).json({ error: 'Too many questions — please try again in a few minutes.' });
+   }
+
+   try {
+     const apiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json',
+         Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+       },
+       body: JSON.stringify({
+         model: 'openai/gpt-oss-20b',
+         max_tokens: 600,
+         messages: [
+           { role: 'system', content: SYSTEM_PROMPT },
+           { role: 'user', content: question },
+         ],
+       }),
+     });
+     const data = await apiRes.json();
+     if (!apiRes.ok) {
+       console.error('Groq API error:', data);
+       return res.status(502).json({ error: 'The assistant is temporarily unavailable. Please try again shortly.' });
+     }
+     const answer = data.choices?.[0]?.message?.content?.trim();
+     res.json({ answer: answer || "Sorry, I couldn't find an answer to that." });
+   } catch (e) {
+     console.error(e);
+     res.status(502).json({ error: 'The assistant is temporarily unavailable. Please try again shortly.' });
+   }
+ });
 
 
 
