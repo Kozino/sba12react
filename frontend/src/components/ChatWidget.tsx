@@ -3,7 +3,7 @@ import { apiFetch } from "@/lib/api";
 
 type Msg = { role: "user" | "bot"; text: string };
 
-const STARTER = "Hi! I can answer questions about the Bosco Class of 2012 constitution — dues, membership, executives, meetings, benefits, and more. What would you like to know?";
+const STARTER = "Hi! I can answer questions about the Bosco Class of 2012. What would you like to know?";
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
@@ -68,7 +68,7 @@ export default function ChatWidget() {
             <img src="/logo.png" alt="" className="h-8 w-8" />
             <div className="leading-tight">
               <p className="font-display text-sm font-bold">SBA 2012 Assistant</p>
-              <p className="text-[11px] text-gold-400">Ask about the constitution</p>
+              <p className="text-[11px] text-gold-400">Ask about anything</p>
             </div>
           </div>
 
