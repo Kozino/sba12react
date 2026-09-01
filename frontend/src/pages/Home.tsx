@@ -34,9 +34,9 @@ export default function HomePage() {
     <>
       {/* Hero */}
       <section className="page-hero">
-        <ImageMarquee images={HERO_MARQUEE_IMAGES} secondsPerImage={2} />
+        <ImageMarquee images={HERO_MARQUEE_IMAGES} intervalMs={3000} />
         <div className="page-hero-overlay" />
-        <div className="container-site relative z-20 max-w-2xl py-16 lg:py-24">
+        <div className="container-site relative z-20 max-w-2xl py-16 lg:max-w-4xl lg:py-24 xl:max-w-5xl">
           <div>
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/40 bg-gold-400/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-gold-300">
               <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
