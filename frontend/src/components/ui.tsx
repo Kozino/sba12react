@@ -121,9 +121,9 @@ export function ImageMarquee({
 }) {
   const duration = images.length * secondsPerImage;
   return (
-    <div className="w-full overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden">
       <div
-        className="flex w-max animate-marquee gap-6"
+        className="flex h-full w-max animate-marquee"
         style={{ animationDuration: `${duration}s` }}
       >
         {[...images, ...images].map((img, i) => (
@@ -131,7 +131,7 @@ export function ImageMarquee({
             key={i}
             src={img.src}
             alt={img.alt}
-            className="h-40 w-64 flex-none rounded-xl object-cover shadow-xl sm:h-48 sm:w-72"
+            className="h-full w-[420px] flex-none object-cover sm:w-[560px]"
           />
         ))}
       </div>
