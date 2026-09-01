@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch, fileUrl } from "@/lib/api";
 import { docLabel } from "@/lib/site";
@@ -87,7 +86,7 @@ export default function AdminGalleryPage() {
       const file = fileRef.current?.files?.[0];
       if (file) fd.append("image", file);
       if (!editId && !file) throw new Error("Please choose an image to upload.");
-      const res = await fetch(editId ? `/api/admin/gallery/${editId}` : "/api/admin/gallery", {
+      const res = await apiFetch(editId ? `/api/admin/gallery/${editId}` : "/api/admin/gallery", {
         method: editId ? "PUT" : "POST",
         body: fd
       });
