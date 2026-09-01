@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { fileUrl } from "@/lib/api";
 import { formatDate, toneClasses } from "@/lib/format";
@@ -114,27 +115,83 @@ export function DateChip({ date }: { date?: string | null }) {
 
 export function ImageMarquee({
   images,
-  secondsPerImage = 2,
+  intervalMs = 3000,
 }: {
   images: { src: string; alt: string }[];
-  secondsPerImage?: number;
+  intervalMs?: number;
 }) {
-  const duration = images.length * secondsPerImage;
+  const [index, setIndex] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const restartTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setIndex((i) => (i + 1) % images.length);
+    }, intervalMs);
+  }, [images.length, intervalMs]);
+
+  useEffect(() => {
+    restartTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [restartTimer]);
+
+  function goTo(i: number) {
+    setIndex(((i % images.length) + images.length) % images.length);
+    restartTimer();
+  }
+
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="flex h-full w-max animate-marquee"
-        style={{ animationDuration: `${duration}s` }}
-      >
-        {[...images, ...images].map((img, i) => (
-          <img
-            key={i}
-            src={img.src}
-            alt={img.alt}
-            className="h-full w-[420px] flex-none object-cover sm:w-[560px]"
-          />
-        ))}
-      </div>
+      {images.map((img, i) => (
+        <img
+          key={i}
+          src={img.src}
+          alt={img.alt}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out ${
+            i === index ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      ))}
+
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            aria-label="Previous photo"
+            onClick={() => goTo(index - 1)}
+            className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-navy-950/40 p-2 text-white transition hover:bg-navy-950/70"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Next photo"
+            onClick={() => goTo(index + 1)}
+            className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-navy-950/40 p-2 text-white transition hover:bg-navy-950/70"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Go to photo ${i + 1}`}
+                onClick={() => goTo(i)}
+                className={`h-2 rounded-full transition-all ${
+                  i === index ? "w-6 bg-gold-400" : "w-2 bg-white/50 hover:bg-white/80"
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
