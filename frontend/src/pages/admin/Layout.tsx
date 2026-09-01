@@ -9,6 +9,7 @@ const nav = [
   { href: "/admin/content/news", label: "News", icon: "M4 5h16v14H4zM8 9h8M8 13h8" },
   { href: "/admin/content/blogs", label: "Blogs", icon: "M4 5h16v14H4zM8 9h5M8 13h8" },
   { href: "/admin/content/gallery", label: "Gallery", icon: "M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4" },
+  { href: "/admin/executives", label: "Executives", icon: "M12 12a4 4 0 100-8 4 4 0 000 8zM4 20c1.5-4 5-6 8-6s6.5 2 8 6" },
   { href: "/admin/documents", label: "Documents", icon: "M7 3h8l4 4v14H7zM15 3v4h4" },
   { href: "/admin/messages", label: "Messages", icon: "M4 5h16v12H8l-4 4z" },
   { href: "/admin/settings", label: "Settings", icon: "M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v3M12 19v3M2 12h3M19 12h3" }
