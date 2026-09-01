@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "@/lib/api";
 import { SITE, EXECUTIVES } from "@/lib/site";
-import { CardImage, DateChip, Excerpt, SectionHead, CtaBand } from "@/components/ui";
+import { CardImage, DateChip, Excerpt, SectionHead, CtaBand, ImageMarquee } from "@/components/ui";
+
+const HERO_MARQUEE_IMAGES = [
+  { src: "/saviobosco1.jpg", alt: "Savio Bosco Alphas 2012 — photo 1" },
+  { src: "/saviobosco2.jpg", alt: "Savio Bosco Alphas 2012 — photo 2" },
+  { src: "/saviobosco3.jpg", alt: "Savio Bosco Alphas 2012 — photo 3" },
+  { src: "/saviobosco4.jpg", alt: "Savio Bosco Alphas 2012 — photo 4" },
+];
 
 type News = { id: number; title: string; body: string; image?: string; date: string };
 type Gallery = { id: number; image: string; title?: string; caption?: string; event_year: number };
@@ -67,6 +74,9 @@ export default function HomePage() {
               className="w-64 drop-shadow-2xl sm:w-80 lg:w-96"
             />
           </div>
+        </div>
+        <div className="container-site relative z-10 pb-16 lg:pb-24">
+          <ImageMarquee images={HERO_MARQUEE_IMAGES} secondsPerImage={2} />
         </div>
       </section>
 
