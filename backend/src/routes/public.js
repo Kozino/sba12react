@@ -59,6 +59,16 @@ router.get('/gallery', async (req, res) => {
   res.json({ gallery: rows });
 });
 
+router.get(
+  '/executives',
+  aw(async (req, res) => {
+    const rows = await q(
+      'SELECT id, name, position, image FROM executives ORDER BY sort_order ASC, id ASC'
+    );
+    res.json({ executives: rows });
+  })
+);
+
 // Public contact settings (no auth)
 router.get('/settings', async (req, res) => {
   const DEFAULTS = {
