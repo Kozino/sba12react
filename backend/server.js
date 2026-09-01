@@ -88,16 +88,27 @@ app.get('/file/:name', (req, res) => {
   res.send(data);
 });
 
-app.get('/api/health', async (req, res) => {
-  const out = { ok: true, storage: isSupabase() ? 'supabase' : 'local' };
+// Fast liveness probe — NO database access. Render polls this during
+// deploys, so it must return instantly even if the DB is down.
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, storage: isSupabase() ? 'supabase' : 'local' });
+});
+
+// Database diagnostic — open this in a browser to see exactly why data
+// requests fail. Bounded so it can't hang.
+app.get('/api/db', async (req, res) => {
+  const timeoutMs = 8000;
   try {
-    await pool.query('SELECT 1');
-    out.db = 'ok';
+    await Promise.race([
+      pool.query('SELECT 1'),
+      new Promise((_, rej) =>
+        setTimeout(() => rej(new Error('DB check timed out (unreachable host/port?)')), timeoutMs)
+      ),
+    ]);
+    res.json({ ok: true, db: 'ok' });
   } catch (e) {
-    out.ok = false;
-    out.db = 'ERROR: ' + (e.code || e.message);
+    res.json({ ok: false, db: 'ERROR: ' + (e.code || e.message) });
   }
-  res.json(out);
 });
 
 app.use('/api', publicRoutes);
@@ -111,11 +122,25 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: dbErrorMessage(err) });
 });
 
-const PORT = process.env.PORT || 8081;
-app.listen(PORT, '0.0.0.0', () => {
+const PORT = Number(process.env.PORT) || 8081;
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(
     `SBA 2012 API listening on :${PORT} — storage: ${
       isSupabase() ? 'Supabase' : 'local disk (dev)'
     }`
   );
+});
+
+// Render's own docs recommend raising these for Node.js services that see
+// intermittent timeouts / "Connection reset by peer" behind their proxy.
+// headersTimeout must be >= keepAliveTimeout.
+server.keepAliveTimeout = 120000;
+server.headersTimeout = 120000;
+
+// Surface a clear error if the port ever fails to bind, instead of the
+// process silently hanging (helps distinguish "app crashed" from
+// "Render's health check didn't reach it").
+server.on('error', (err) => {
+  console.error('Server failed to start:', err.code || '', err.message);
+  process.exit(1);
 });
