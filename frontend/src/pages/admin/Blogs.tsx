@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch, fileUrl } from "@/lib/api";
 import { Link } from "react-router-dom";
@@ -92,7 +91,7 @@ export default function AdminBlogsPage() {
       fd.append("body", body);
       const file = fileRef.current?.files?.[0];
       if (file) fd.append("image", file);
-      const res = await fetch(editId ? `/api/admin/blogs/${editId}` : "/api/admin/blogs", {
+      const res = await apiFetch(editId ? `/api/admin/blogs/${editId}` : "/api/admin/blogs", {
         method: editId ? "PUT" : "POST",
         body: fd
       });
