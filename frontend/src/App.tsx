@@ -56,6 +56,7 @@ export default function App() {
           <Route path="/audit" element={<AuditPage />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminLoginPage />} />
+            <Route path="login" element={<AdminLoginPage />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="content/news" element={<NewsAdminPage />} />
