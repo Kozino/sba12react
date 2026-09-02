@@ -96,8 +96,16 @@
   }
   .rich-text-editor .ql-editor {
     min-height: 180px;
+    line-height: 1.4;
   }
-
+  .rich-text-editor .ql-editor p,
+  .rich-text-editor .ql-editor h2,
+  .rich-text-editor .ql-editor h3,
+  .rich-text-editor .ql-editor ul,
+  .rich-text-editor .ql-editor ol,
+  .rich-text-editor .ql-editor blockquote {
+    margin: 0;
+  }
   /* Rich content display (public news/blog pages) */
   .prose-content {
     font-size: 15px;
