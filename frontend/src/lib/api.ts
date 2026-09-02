@@ -6,7 +6,6 @@
  * e.g. https://sba2012-api.onrender.com
  */
 export const API = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
-
 const TOKEN_KEY = "sba_admin_token";
 
 export function getToken(): string {
@@ -33,7 +32,15 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  return fetch(`${API}${path}`, { ...init, headers });
+  const res = await fetch(`${API}${path}`, { ...init, headers });
+
+  // A 401 means the stored token is invalid/expired — clear it so the app
+  // doesn't keep thinking we're authenticated and loop on every admin page.
+  if (res.status === 401 && token) {
+    setToken("");
+  }
+
+  return res;
 }
 
 /** Resolve a stored file name (e.g. "news-2026..jpg") to its API URL. */
