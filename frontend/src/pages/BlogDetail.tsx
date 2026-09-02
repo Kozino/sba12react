@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { apiFetch } from "@/lib/api";
-import { CardImage, DateChip, GoldDivider, PageHero, RichContent } from "@/components/ui";
+import { CardImage, DateChip, GoldDivider, PageHero } from "@/components/ui";
+import { RichContent } from "@/components/RichContent";
 
 type Blog = {
   id: number; title: string; author?: string; excerpt?: string;
