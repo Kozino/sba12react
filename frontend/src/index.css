@@ -80,4 +80,78 @@
   .badge {
     @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold;
   }
+
+  /* Rich text editor (admin forms) */
+  .rich-text-editor .ql-toolbar {
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+  .rich-text-editor .ql-container {
+    border: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    min-height: 180px;
+  }
+  .rich-text-editor .ql-editor {
+    min-height: 180px;
+  }
+
+  /* Rich content display (public news/blog pages) */
+  .prose-content {
+    font-size: 15px;
+    line-height: 1.75;
+    color: #334155;
+  }
+  .prose-content > * + * {
+    margin-top: 1.25rem;
+  }
+  .prose-content h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #0f2540;
+  }
+  .prose-content h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #0f2540;
+  }
+  .prose-content strong {
+    font-weight: 700;
+    color: #1e293b;
+  }
+  .prose-content em {
+    font-style: italic;
+  }
+  .prose-content ul,
+  .prose-content ol {
+    padding-left: 1.5rem;
+  }
+  .prose-content ul {
+    list-style: disc;
+  }
+  .prose-content ol {
+    list-style: decimal;
+  }
+  .prose-content li + li {
+    margin-top: 0.35rem;
+  }
+  .prose-content blockquote {
+    border-left: 4px solid #c9a227;
+    padding-left: 1rem;
+    font-style: italic;
+    color: #1e3a5f;
+  }
+  .prose-content a {
+    color: #0f2540;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .prose-content a:hover {
+    color: #c9a227;
+  }
+}
 }
