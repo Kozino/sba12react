@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch, fileUrl } from "@/lib/api";
 import { Link } from "react-router-dom";
 import { formatDate } from "@/lib/format";
-import { Excerpt } from "@/components/ui";
+import { RichTextEditor, stripHtml } from "@/components/RichTextEditor";
 
 type NewsItem = {
   id: number;
@@ -73,6 +73,10 @@ export default function AdminNewsPage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (stripHtml(body).length === 0) {
+      setError("Body cannot be empty.");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -127,13 +131,8 @@ export default function AdminNewsPage() {
           </div>
         </div>
         <div>
-          <label className="label">Body * (blank line between paragraphs)</label>
-          <textarea
-            className="input min-h-44"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            required
-          />
+          <label className="label">Body *</label>
+          <RichTextEditor value={body} onChange={setBody} placeholder="Write the announcement…" />
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <input
@@ -179,35 +178,39 @@ export default function AdminNewsPage() {
             ) : items.length === 0 ? (
               <tr><td colSpan={4} className="py-10 text-center text-slate-500">No news yet.</td></tr>
             ) : (
-              items.map((n) => (
-                <tr key={n.id}>
-                  <td>
-                    {n.image ? (
-                      <img src={fileUrl(n.image)} alt="" className="h-12 w-20 rounded-lg object-cover" />
-                    ) : (
-                      <div className="h-12 w-20 rounded-lg bg-navy-100" />
-                    )}
-                  </td>
-                  <td>
-                    <p className="font-semibold text-navy-900">{n.title}</p>
-                    <p className="mt-1 max-w-xl text-xs text-slate-500">
-                      <Excerpt text={n.body} length={110} />
-                    </p>
-                  </td>
-                  <td className="whitespace-nowrap">{formatDate(n.date)}</td>
-                  <td className="whitespace-nowrap text-right">
-                    <Link to={`/news/${n.id}`} className="mr-3 text-xs font-bold text-slate-500 underline" target="_blank">
-                      View
-                    </Link>
-                    <button className="mr-3 text-xs font-bold text-navy-700 underline" onClick={() => edit(n)}>
-                      Edit
-                    </button>
-                    <button className="text-xs font-bold text-red-600 underline" onClick={() => remove(n)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
+              items.map((n) => {
+                const preview = stripHtml(n.body);
+                return (
+                  <tr key={n.id}>
+                    <td>
+                      {n.image ? (
+                        <img src={fileUrl(n.image)} alt="" className="h-12 w-20 rounded-lg object-cover" />
+                      ) : (
+                        <div className="h-12 w-20 rounded-lg bg-navy-100" />
+                      )}
+                    </td>
+                    <td>
+                      <p className="font-semibold text-navy-900">{n.title}</p>
+                      <p className="mt-1 max-w-xl text-xs text-slate-500">
+                        {preview.slice(0, 110)}
+                        {preview.length > 110 ? "…" : ""}
+                      </p>
+                    </td>
+                    <td className="whitespace-nowrap">{formatDate(n.date)}</td>
+                    <td className="whitespace-nowrap text-right">
+                      <Link to={`/news/${n.id}`} className="mr-3 text-xs font-bold text-slate-500 underline" target="_blank">
+                        View
+                      </Link>
+                      <button className="mr-3 text-xs font-bold text-navy-700 underline" onClick={() => edit(n)}>
+                        Edit
+                      </button>
+                      <button className="text-xs font-bold text-red-600 underline" onClick={() => remove(n)}>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
