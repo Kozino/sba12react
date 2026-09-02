@@ -115,7 +115,7 @@
     word-break: break-word;
   }
   .prose-content > * + * {
-    margin-top: 1.25rem;
+    margin-top: 0.6rem;
   }
   .prose-content h2 {
     font-family: var(--font-display);
