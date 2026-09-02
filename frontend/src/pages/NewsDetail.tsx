@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { apiFetch } from "@/lib/api";
-import { CardImage, DateChip, GoldDivider, PageHero } from "@/components/ui";
+import { CardImage, DateChip, GoldDivider, PageHero, RichContent } from "@/components/ui";
 
 type News = { id: number; title: string; body: string; image?: string; date: string };
 
@@ -51,12 +51,8 @@ export default function NewsDetailPage() {
           <div className="mt-8">
             <GoldDivider />
           </div>
-          <div className="mt-8 space-y-5 text-[15px] leading-relaxed text-slate-700">
-            {String(news.body)
-              .split(/\n{2,}/)
-              .map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+          <div className="mt-8">
+            <RichContent html={news.body} />
           </div>
         </div>
       </article>
