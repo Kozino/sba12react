@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch, fileUrl } from "@/lib/api";
 import { Link } from "react-router-dom";
 import { formatDate } from "@/lib/format";
+import { RichTextEditor, stripHtml } from "@/components/RichTextEditor";
 
 type BlogItem = {
   id: number;
@@ -80,6 +81,10 @@ export default function AdminBlogsPage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (stripHtml(body).length === 0) {
+      setError("Body cannot be empty.");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -144,8 +149,8 @@ export default function AdminBlogsPage() {
           </div>
         </div>
         <div>
-          <label className="label">Body * (blank line between paragraphs)</label>
-          <textarea className="input min-h-44" value={body} onChange={(e) => setBody(e.target.value)} required />
+          <label className="label">Body *</label>
+          <RichTextEditor value={body} onChange={setBody} placeholder="Write the post…" />
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <input
