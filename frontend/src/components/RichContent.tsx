@@ -9,7 +9,7 @@ const ALLOWED_TAGS = [
   "p", "br", "strong", "em", "u", "s",
   "h2", "h3", "ul", "ol", "li", "blockquote", "a",
 ];
-const ALLOWED_ATTR = ["href", "target", "rel"];
+const ALLOWED_ATTR = ["href", "target", "rel", "class"];
 
 export function RichContent({ html, className = "" }: Props) {
   const clean = DOMPurify.sanitize(html, { ALLOWED_TAGS, ALLOWED_ATTR });
