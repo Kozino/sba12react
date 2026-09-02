@@ -103,6 +103,8 @@
     font-size: 15px;
     line-height: 1.75;
     color: #334155;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .prose-content > * + * {
     margin-top: 1.25rem;
@@ -128,13 +130,39 @@
   }
   .prose-content ul,
   .prose-content ol {
+    list-style: none;
     padding-left: 1.5rem;
   }
-  .prose-content ul {
-    list-style: disc;
+  .prose-content ul > li {
+    position: relative;
+  }
+  .prose-content ul > li::before {
+    content: "•";
+    position: absolute;
+    left: -1.2em;
+    color: #64748b;
   }
   .prose-content ol {
-    list-style: decimal;
+    counter-reset: ql-counter;
+  }
+  .prose-content ol > li {
+    counter-increment: ql-counter;
+    position: relative;
+  }
+  .prose-content ol > li::before {
+    content: counter(ql-counter) ".";
+    position: absolute;
+    left: -1.5em;
+    color: #64748b;
+  }
+  .prose-content li.ql-indent-1 {
+    padding-left: 1.5rem;
+  }
+  .prose-content li.ql-indent-2 {
+    padding-left: 3rem;
+  }
+  .prose-content li.ql-indent-3 {
+    padding-left: 4.5rem;
   }
   .prose-content li + li {
     margin-top: 0.35rem;
@@ -154,4 +182,3 @@
     color: #c9a227;
   }
 }
-
