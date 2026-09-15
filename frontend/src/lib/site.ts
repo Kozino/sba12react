@@ -33,9 +33,9 @@ export const PAYMENT_TYPES = [
   },
   {
     key: "wedding_contribution",
-    label: "Wedding Contribution",
+    label: "Wedding Contribution/Priestly Ordination",
     description:
-      "Support for the marriage of financially up-to-date members (Constitution, Part Two §3.iv)."
+      "Support for the marriage/ordination of financially up-to-date members (Constitution, Part Two §3.iv)."
   }
 ] as const;
 
