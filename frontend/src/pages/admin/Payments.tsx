@@ -1,10 +1,11 @@
-
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { naira, formatDate, paymentStatus } from "@/lib/format";
 import { PAYMENT_TYPES, payLabel } from "@/lib/site";
 import { StatusBadge, EmptyState } from "@/components/ui";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 type Member = {
   id: number;
@@ -27,6 +28,118 @@ type Payment = {
   updated_at: string;
 };
 
+const STATUS_OPTIONS = ["Paid", "Partially Paid", "Owing", "Contribution", "No Record"];
+
+/* ---------------- Export helpers ---------------- */
+
+function downloadBlob(content: Blob, filename: string) {
+  const url = URL.createObjectURL(content);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function exportCsv(rows: Payment[]) {
+  const header = [
+    "Member ID",
+    "Member Name",
+    "Payment Type",
+    "Year",
+    "Expected (NGN)",
+    "Paid (NGN)",
+    "Balance (NGN)",
+    "Status",
+    "Note",
+    "Updated"
+  ];
+  const esc = (v: string | number) => {
+    const s = String(v ?? "");
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const lines = rows.map((p) => {
+    const st = paymentStatus(p.expected, p.paid);
+    return [
+      p.unique_id,
+      `${p.first_name} ${p.last_name}`.trim(),
+      payLabel(p.type),
+      p.year,
+      p.expected,
+      p.paid,
+      Math.max(0, p.expected - p.paid),
+      st.label,
+      p.note || "",
+      formatDate(p.updated_at)
+    ]
+      .map(esc)
+      .join(",");
+  });
+  const csv = [header.map(esc).join(","), ...lines].join("\r\n");
+  downloadBlob(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }), exportFileName(rows, "csv"));
+}
+
+function exportPdf(rows: Payment[]) {
+  const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+  doc.setFontSize(14);
+  doc.setTextColor(0, 29, 105);
+  doc.text("Savio Bosco Alphas 2012 — Payment Records", 40, 40);
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  const totals = rows.reduce(
+    (t, p) => ({
+      expected: t.expected + (Number(p.expected) || 0),
+      paid: t.paid + (Number(p.paid) || 0)
+    }),
+    { expected: 0, paid: 0 }
+  );
+  doc.text(
+    `Generated ${new Date().toLocaleString()}  ·  ${rows.length} record(s)  ·  Expected ${naira(totals.expected)}  ·  Paid ${naira(totals.paid)}`,
+    40,
+    56
+  );
+  autoTable(doc, {
+    startY: 70,
+    head: [
+      ["Member ID", "Member", "Payment", "Year", "Expected", "Paid", "Balance", "Status", "Note", "Updated"]
+    ],
+    body: rows.map((p) => {
+      const st = paymentStatus(p.expected, p.paid);
+      return [
+        p.unique_id,
+        `${p.first_name} ${p.last_name}`.trim(),
+        payLabel(p.type),
+        String(p.year),
+        naira(p.expected),
+        naira(p.paid),
+        naira(Math.max(0, p.expected - p.paid)),
+        st.label,
+        p.note || "—",
+        formatDate(p.updated_at)
+      ];
+    }),
+    styles: { fontSize: 8, cellPadding: 4 },
+    headStyles: { fillColor: [0, 29, 105], textColor: [253, 191, 46] },
+    alternateRowStyles: { fillColor: [243, 245, 252] }
+  });
+  doc.save(exportFileName(rows, "pdf"));
+}
+
+function exportFileName(rows: Payment[], ext: string) {
+  const parts: string[] = ["sba12-payments"];
+  const years = [...new Set(rows.map((r) => r.year))];
+  if (years.length === 1) parts.push(String(years[0]));
+  const types = [...new Set(rows.map((r) => r.type))];
+  if (types.length === 1) parts.push(types[0].replace(/_/g, "-"));
+  const ids = [...new Set(rows.map((r) => r.unique_id))];
+  if (ids.length === 1) parts.push(ids[0].toLowerCase());
+  return `${parts.join("-")}.${ext}`;
+}
+
+/* ---------------- Page ---------------- */
+
 function PaymentsBody() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -39,6 +152,7 @@ function PaymentsBody() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // Entry form state
   const [memberId, setMemberId] = useState<number | "">("");
   const [type, setType] = useState<string>(PAYMENT_TYPES[0].key);
   const [year, setYear] = useState<string>(String(new Date().getFullYear()));
@@ -46,6 +160,13 @@ function PaymentsBody() {
   const [paid, setPaid] = useState<string>("0");
   const [note, setNote] = useState("");
   const [editId, setEditId] = useState<number | null>(null);
+
+  // Table filter state
+  const [fYear, setFYear] = useState<string>("all");
+  const [fType, setFType] = useState<string>("all");
+  const [fStatus, setFStatus] = useState<string>("all");
+  const [fMember, setFMember] = useState<string>("");
+  const [fNote, setFNote] = useState<string>("");
 
   const load = useCallback(async () => {
     const [mRes, pRes] = await Promise.all([
@@ -75,13 +196,57 @@ function PaymentsBody() {
     }
   }, [memberFilter, members]);
 
-  const filtered =
-    memberFilter && members.length > 0
-      ? (() => {
-          const m = members.find((x) => x.unique_id === memberFilter);
-          return m ? payments.filter((p) => p.member_id === m.id) : payments;
-        })()
-      : payments;
+  // Base list = all payments, or just this member's (from the ?member= link)
+  const baseList = useMemo(() => {
+    if (!memberFilter || members.length === 0) return payments;
+    const m = members.find((x) => x.unique_id === memberFilter);
+    return m ? payments.filter((p) => p.member_id === m.id) : payments;
+  }, [payments, memberFilter, members]);
+
+  const distinctYears = useMemo(
+    () => [...new Set(baseList.map((p) => p.year))].sort((a, b) => b - a),
+    [baseList]
+  );
+
+  // Apply the UI filters
+  const filtered = useMemo(() => {
+    const memberQ = fMember.trim().toLowerCase();
+    const noteQ = fNote.trim().toLowerCase();
+    return baseList.filter((p) => {
+      if (fYear !== "all" && String(p.year) !== fYear) return false;
+      if (fType !== "all" && p.type !== fType) return false;
+      if (fStatus !== "all" && paymentStatus(p.expected, p.paid).label !== fStatus) return false;
+      if (memberQ) {
+        const hay = `${p.first_name} ${p.last_name} ${p.unique_id}`.toLowerCase();
+        if (!hay.includes(memberQ)) return false;
+      }
+      if (noteQ && !String(p.note || "").toLowerCase().includes(noteQ)) return false;
+      return true;
+    });
+  }, [baseList, fYear, fType, fStatus, fMember, fNote]);
+
+  const totals = useMemo(
+    () =>
+      filtered.reduce(
+        (t, p) => ({
+          expected: t.expected + (Number(p.expected) || 0),
+          paid: t.paid + (Number(p.paid) || 0)
+        }),
+        { expected: 0, paid: 0 }
+      ),
+    [filtered]
+  );
+
+  const hasFilters =
+    fYear !== "all" || fType !== "all" || fStatus !== "all" || fMember !== "" || fNote !== "";
+
+  function clearFilters() {
+    setFYear("all");
+    setFType("all");
+    setFStatus("all");
+    setFMember("");
+    setFNote("");
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -272,9 +437,98 @@ function PaymentsBody() {
       {/* All payments */}
       <div className="card overflow-x-auto">
         <div className="border-b border-slate-200 px-5 py-4">
-          <h2 className="font-display text-lg font-bold text-navy-900">
-            All Payment Records
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-display text-lg font-bold text-navy-900">
+              All Payment Records
+              <span className="ml-2 text-xs font-semibold text-slate-400">
+                {filtered.length} of {baseList.length}
+              </span>
+            </h2>
+            <div className="flex gap-2">
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => exportCsv(filtered)}
+                disabled={filtered.length === 0}
+              >
+                ⬇ Export CSV
+              </button>
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => exportPdf(filtered)}
+                disabled={filtered.length === 0}
+              >
+                ⬇ Export PDF
+              </button>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div>
+              <label className="label text-[11px] uppercase tracking-wider text-slate-400">Year</label>
+              <select className="input" value={fYear} onChange={(e) => setFYear(e.target.value)}>
+                <option value="all">All years</option>
+                {distinctYears.map((y) => (
+                  <option key={y} value={String(y)}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label text-[11px] uppercase tracking-wider text-slate-400">Payment type</label>
+              <select className="input" value={fType} onChange={(e) => setFType(e.target.value)}>
+                <option value="all">All types</option>
+                {PAYMENT_TYPES.map((t) => (
+                  <option key={t.key} value={t.key}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label text-[11px] uppercase tracking-wider text-slate-400">Status</label>
+              <select className="input" value={fStatus} onChange={(e) => setFStatus(e.target.value)}>
+                <option value="all">All statuses</option>
+                {STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label text-[11px] uppercase tracking-wider text-slate-400">Member (name or ID)</label>
+              <input
+                className="input"
+                placeholder="e.g. Okoyeocha or SBA12P47"
+                value={fMember}
+                onChange={(e) => setFMember(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label text-[11px] uppercase tracking-wider text-slate-400">Note / keyword</label>
+              <input
+                className="input"
+                placeholder="e.g. AGM, wedding"
+                value={fNote}
+                onChange={(e) => setFNote(e.target.value)}
+              />
+            </div>
+          </div>
+          {hasFilters && (
+            <div className="mt-2 flex items-center justify-between text-xs">
+              <span className="text-slate-500">
+                Filtered totals — Expected{" "}
+                <strong className="text-navy-800">{naira(totals.expected)}</strong> · Paid{" "}
+                <strong className="text-navy-800">{naira(totals.paid)}</strong> · Balance{" "}
+                <strong className="text-red-600">{naira(Math.max(0, totals.expected - totals.paid))}</strong>
+              </span>
+              <button className="font-bold text-navy-700 underline" onClick={clearFilters}>
+                Clear filters
+              </button>
+            </div>
+          )}
         </div>
         <table className="table-base">
           <thead>
@@ -300,7 +554,13 @@ function PaymentsBody() {
               <tr>
                 <td colSpan={8}>
                   <div className="py-6">
-                    <EmptyState message="No payment records yet. Use the form above to record the first one." />
+                    <EmptyState
+                      message={
+                        hasFilters
+                          ? "No records match the current filters. Clear the filters to see everything."
+                          : "No payment records yet. Use the form above to record the first one."
+                      }
+                    />
                   </div>
                 </td>
               </tr>
