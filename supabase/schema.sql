@@ -127,3 +127,36 @@ CREATE TABLE IF NOT EXISTS admins (
 CREATE INDEX IF NOT EXISTS idx_payments_member ON payments(member_id);
 CREATE INDEX IF NOT EXISTS idx_documents_type_year ON documents(type, year);
 CREATE INDEX IF NOT EXISTS idx_gallery_year ON gallery(event_year);
+
+-- ---------- Executives (admin-managed, public site) ----------
+CREATE TABLE IF NOT EXISTS executives (
+  id          SERIAL PRIMARY KEY,
+  name        TEXT NOT NULL,
+  position    TEXT NOT NULL,
+  image       TEXT NOT NULL DEFAULT '',
+  sort_order  INT NOT NULL DEFAULT 0,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ---------- Account (financial records: income & expenditure) ----------
+CREATE TABLE IF NOT EXISTS account_years (
+  id                   SERIAL PRIMARY KEY,
+  year                 INT NOT NULL UNIQUE,
+  opening_balance      DOUBLE PRECISION NOT NULL DEFAULT 0,
+  financial_secretary  TEXT NOT NULL DEFAULT '',
+  updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS account_entries (
+  id          SERIAL PRIMARY KEY,
+  year        INT NOT NULL REFERENCES account_years(year) ON DELETE CASCADE,
+  kind        TEXT NOT NULL CHECK (kind IN ('income', 'expense')),
+  name        TEXT NOT NULL,
+  amount      DOUBLE PRECISION NOT NULL CHECK (amount >= 0),
+  entry_date  DATE NOT NULL,
+  note        TEXT NOT NULL DEFAULT '',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_account_entries_year ON account_entries(year, kind, entry_date);
