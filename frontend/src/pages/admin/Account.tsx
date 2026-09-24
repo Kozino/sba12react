@@ -11,6 +11,7 @@ type AccountYear = {
   year: number;
   opening_balance: number;
   financial_secretary: string;
+  report_note: string;
 };
 
 type AccountEntry = {
@@ -167,6 +168,17 @@ async function exportExcel(yearRow: AccountYear, entries: AccountEntry[]) {
   };
 
   s.addRow([]);
+  const noteTextX = String(yearRow.report_note ?? "").trim();
+  if (noteTextX) {
+    const nr = s.addRow([`Note: ${noteTextX}`, ""]);
+    s.mergeCells(nr.number, 1, nr.number, 2);
+    const nc = nr.getCell(1);
+    nc.value = `Note: ${noteTextX}`;
+    nc.font = { bold: true, italic: true };
+    nc.alignment = { wrapText: true, vertical: "top" };
+    nr.height = Math.max(20, 16 * (1 + Math.floor(noteTextX.length / 90)));
+    s.addRow([]);
+  }
   const meta: [string, string][] = [
     ["Prepared by", yearRow.financial_secretary || "Financial Secretary"],
     ["Position", "Financial Secretary, Savio Bosco Alphas 2012"],
@@ -404,8 +416,34 @@ async function exportPdf(yearRow: AccountYear, entries: AccountEntry[]) {
   section(`INCOME FOR THE YEAR ${yearRow.year}`, income, totals.income);
   section(`EXPENDITURE FOR THE YEAR ${yearRow.year}`, expense, totals.expense);
 
+  // ---- Note (bold + italic) then signature block ----
+  // The note and the signature stay on the current page whenever they fit,
+  // so a one-page report stays one page; they flow to a new page only when
+  // the report genuinely cannot fit on one page.
+  const noteText = String(yearRow.report_note ?? "").trim();
+  doc.setFont("times", "bolditalic");
+  doc.setFontSize(11);
+  const noteLines = noteText
+    ? (doc.splitTextToSize(`Note: ${noteText}`, RIGHT - MARGIN) as string[])
+    : [];
+  const SIG_H = 120;
+  const noteH = noteLines.length ? 22 + noteLines.length * 15 + 10 : 0;
+  ensureSpace(noteH + SIG_H);
+
+  if (noteLines.length) {
+    y += 22;
+    doc.setFont("times", "bolditalic");
+    doc.setTextColor(25, 25, 25);
+    for (const line of noteLines) {
+      ensureSpace(18);
+      doc.text(line, MARGIN, y);
+      y += 15;
+    }
+    y += 10;
+  }
+
   // ---- Signature block ----
-  ensureSpace(130);
+  ensureSpace(SIG_H);
   y += 34;
   doc.setFont("times", "normal");
   doc.setFontSize(11);
@@ -465,6 +503,7 @@ function AccountBody() {
   // Year settings form
   const [opening, setOpening] = useState("0");
   const [secretary, setSecretary] = useState("");
+  const [reportNote, setReportNote] = useState("");
   const [newYear, setNewYear] = useState("");
 
   // Entry form
@@ -509,6 +548,7 @@ function AccountBody() {
     setTotals(data.totals || { income: 0, expense: 0, net: 0, opening: 0, closing: 0 });
     setOpening(String(Number(data.year.opening_balance) || 0));
     setSecretary(data.year.financial_secretary || "");
+    setReportNote(data.year.report_note || "");
   }, []);
 
   useEffect(() => {
@@ -557,7 +597,8 @@ function AccountBody() {
         body: JSON.stringify({
           year,
           opening_balance: Number(opening) || 0,
-          financial_secretary: secretary
+          financial_secretary: secretary,
+          report_note: reportNote
         })
       });
       const data = await res.json();
@@ -566,6 +607,7 @@ function AccountBody() {
       await Promise.all([loadYears(), loadAccount(year)]);
       setOpening(String(Number(data.year.opening_balance) || 0));
       setSecretary(data.year.financial_secretary || "");
+      setReportNote(data.year.report_note || "");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
     }
@@ -674,7 +716,8 @@ function AccountBody() {
           : {
               year,
               opening_balance: Number(opening) || 0,
-              financial_secretary: secretary
+              financial_secretary: secretary,
+              report_note: reportNote
             };
       if (type === "xlsx") await exportExcel(yr, entries);
       else await exportPdf(yr, entries);
@@ -858,6 +901,19 @@ function AccountBody() {
               {saving ? "Saving..." : "Save Year Details"}
             </button>
           </div>
+        </div>
+        <div>
+          <label className="label">Note (optional)</label>
+          <textarea
+            className="input min-h-[72px] w-full"
+            rows={3}
+            value={reportNote}
+            onChange={(e) => setReportNote(e.target.value)}
+            placeholder="Anything the Financial Secretary wants explained at the end of the report — printed bold & italic just before the signature block."
+          />
+          <p className="mt-1 text-[11px] text-slate-400">
+            Appears at the end of the Excel and PDF reports, before “Prepared and submitted by”.
+          </p>
         </div>
       </form>
 
