@@ -6,6 +6,7 @@ import LogoutButton from "@/components/admin/LogoutButton";
 const nav = [
   { href: "/admin/dashboard", label: "Dashboard", icon: "M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10" },
   { href: "/admin/payments", label: "Payments", icon: "M3 6h18v12H3zM3 10h18" },
+  { href: "/admin/account", label: "Account", icon: "M4 4h16v16H4zM8 4v16M12 9h5M12 13h5" },
   { href: "/admin/content/news", label: "News", icon: "M4 5h16v14H4zM8 9h8M8 13h8" },
   { href: "/admin/content/blogs", label: "Blogs", icon: "M4 5h16v14H4zM8 9h5M8 13h8" },
   { href: "/admin/content/gallery", label: "Gallery", icon: "M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4" },
