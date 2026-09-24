@@ -691,7 +691,7 @@ router.get(
       return res.status(400).json({ error: 'Please provide a valid year.' });
     const yearRow =
       (await one('SELECT * FROM account_years WHERE year = $1', [year])) ||
-      { year, opening_balance: 0, financial_secretary: '' };
+      { year, opening_balance: 0, financial_secretary: '', report_note: '' };
     const entries = await q(
       `SELECT id, year, kind, name, amount,
               TO_CHAR(entry_date, 'YYYY-MM-DD') AS entry_date,
@@ -716,13 +716,14 @@ router.put(
     if (!Number.isFinite(opening) || opening < 0)
       return res.status(400).json({ error: 'Opening balance must be zero or more.' });
     const secretary = String(d.financial_secretary ?? '').trim();
+    const reportNote = String(d.report_note ?? '').slice(0, 4000);
     const yearRow = await one(
-      `INSERT INTO account_years (year, opening_balance, financial_secretary)
-       VALUES ($1,$2,$3)
+      `INSERT INTO account_years (year, opening_balance, financial_secretary, report_note)
+       VALUES ($1,$2,$3,$4)
        ON CONFLICT (year)
-       DO UPDATE SET opening_balance=$2, financial_secretary=$3, updated_at=NOW()
+       DO UPDATE SET opening_balance=$2, financial_secretary=$3, report_note=$4, updated_at=NOW()
        RETURNING *`,
-      [year, opening, secretary]
+      [year, opening, secretary, reportNote]
     );
     res.json({ year: yearRow });
   })
