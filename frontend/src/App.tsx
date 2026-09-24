@@ -19,6 +19,7 @@ import AdminLayout from "./pages/admin/Layout";
 import AdminLoginPage from "./pages/admin/Login";
 import DashboardPage from "./pages/admin/Dashboard";
 import PaymentsPage from "./pages/admin/Payments";
+import AccountPage from "./pages/admin/Account";
 import NewsAdminPage from "./pages/admin/News";
 import BlogsAdminPage from "./pages/admin/Blogs";
 import GalleryAdminPage from "./pages/admin/GalleryAdmin";
@@ -59,6 +60,7 @@ export default function App() {
             <Route path="login" element={<AdminLoginPage />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="payments" element={<PaymentsPage />} />
+            <Route path="account" element={<AccountPage />} />
             <Route path="content/news" element={<NewsAdminPage />} />
             <Route path="content/blogs" element={<BlogsAdminPage />} />
             <Route path="content/gallery" element={<GalleryAdminPage />} />
