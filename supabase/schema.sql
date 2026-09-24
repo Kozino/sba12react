@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS account_years (
   year                 INT NOT NULL UNIQUE,
   opening_balance      DOUBLE PRECISION NOT NULL DEFAULT 0,
   financial_secretary  TEXT NOT NULL DEFAULT '',
+  report_note          TEXT NOT NULL DEFAULT '',
   updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
