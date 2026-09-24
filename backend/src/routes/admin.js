@@ -640,4 +640,171 @@ router.post(
   })
 );
 
+/* ---------------- Account (financial records) ---------------- */
+
+const ACCOUNT_KINDS = ['income', 'expense'];
+
+/** Strict YYYY-MM-DD validation; returns the string or null. */
+function validDateStr(v) {
+  const s = String(v ?? '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const d = new Date(s + 'T00:00:00Z');
+  return isNaN(d.getTime()) ? null : s;
+}
+
+async function ensureAccountYear(year) {
+  const existing = await one('SELECT * FROM account_years WHERE year = $1', [year]);
+  if (existing) return existing;
+  return one('INSERT INTO account_years (year) VALUES ($1) RETURNING *', [year]);
+}
+
+function accountTotals(yearRow, entries) {
+  const income = entries
+    .filter((e) => e.kind === 'income')
+    .reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const expense = entries
+    .filter((e) => e.kind === 'expense')
+    .reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const opening = Number(yearRow && yearRow.opening_balance) || 0;
+  return {
+    income,
+    expense,
+    net: income - expense,
+    opening,
+    closing: opening + income - expense
+  };
+}
+
+router.get(
+  '/account/years',
+  aw(async (req, res) => {
+    const rows = await q('SELECT * FROM account_years ORDER BY year DESC');
+    res.json({ years: rows });
+  })
+);
+
+router.get(
+  '/account',
+  aw(async (req, res) => {
+    const year = Number(req.query.year);
+    if (!Number.isInteger(year) || year < 2000 || year > 2100)
+      return res.status(400).json({ error: 'Please provide a valid year.' });
+    const yearRow =
+      (await one('SELECT * FROM account_years WHERE year = $1', [year])) ||
+      { year, opening_balance: 0, financial_secretary: '' };
+    const entries = await q(
+      `SELECT id, year, kind, name, amount,
+              TO_CHAR(entry_date, 'YYYY-MM-DD') AS entry_date,
+              note, updated_at
+         FROM account_entries
+        WHERE year = $1
+        ORDER BY entry_date ASC, id ASC`,
+      [year]
+    );
+    res.json({ year: yearRow, entries, totals: accountTotals(yearRow, entries) });
+  })
+);
+
+router.put(
+  '/account/year',
+  aw(async (req, res) => {
+    const d = req.body || {};
+    const year = Number(d.year);
+    if (!Number.isInteger(year) || year < 2000 || year > 2100)
+      return res.status(400).json({ error: 'Please enter a valid year.' });
+    const opening = Number(d.opening_balance);
+    if (!Number.isFinite(opening) || opening < 0)
+      return res.status(400).json({ error: 'Opening balance must be zero or more.' });
+    const secretary = String(d.financial_secretary ?? '').trim();
+    const yearRow = await one(
+      `INSERT INTO account_years (year, opening_balance, financial_secretary)
+       VALUES ($1,$2,$3)
+       ON CONFLICT (year)
+       DO UPDATE SET opening_balance=$2, financial_secretary=$3, updated_at=NOW()
+       RETURNING *`,
+      [year, opening, secretary]
+    );
+    res.json({ year: yearRow });
+  })
+);
+
+router.post(
+  '/account/entries',
+  aw(async (req, res) => {
+    const d = req.body || {};
+    const year = Number(d.year);
+    if (!Number.isInteger(year) || year < 2000 || year > 2100)
+      return res.status(400).json({ error: 'Please enter a valid year.' });
+    const kind = String(d.kind ?? '');
+    if (!ACCOUNT_KINDS.includes(kind))
+      return res.status(400).json({ error: 'Invalid entry type.' });
+    const name = String(d.name ?? '').trim();
+    if (!name) return res.status(400).json({ error: 'Please enter the name of the item.' });
+    const amount = Number(d.amount);
+    if (!Number.isFinite(amount) || amount <= 0)
+      return res.status(400).json({ error: 'Amount must be a positive number (in naira).' });
+    const entryDate = validDateStr(d.entry_date);
+    if (!entryDate)
+      return res.status(400).json({ error: 'Please provide a valid date.' });
+    const note = String(d.note ?? '').trim();
+
+    await ensureAccountYear(year);
+    const entry = await one(
+      `INSERT INTO account_entries (year, kind, name, amount, entry_date, note)
+       VALUES ($1,$2,$3,$4,$5,$6)
+       RETURNING id, year, kind, name, amount,
+                 TO_CHAR(entry_date, 'YYYY-MM-DD') AS entry_date,
+                 note, updated_at`,
+      [year, kind, name, amount, entryDate, note]
+    );
+    res.status(201).json({ entry });
+  })
+);
+
+router.put(
+  '/account/entries/:id',
+  aw(async (req, res) => {
+    const d = req.body || {};
+    const existing = await one('SELECT * FROM account_entries WHERE id = $1', [
+      Number(req.params.id)
+    ]);
+    if (!existing) return res.status(404).json({ error: 'Entry not found.' });
+    const kind = d.kind ? String(d.kind) : existing.kind;
+    if (!ACCOUNT_KINDS.includes(kind))
+      return res.status(400).json({ error: 'Invalid entry type.' });
+    const name = String(d.name ?? existing.name).trim();
+    if (!name) return res.status(400).json({ error: 'Please enter the name of the item.' });
+    const amount = Number(d.amount ?? existing.amount);
+    if (!Number.isFinite(amount) || amount <= 0)
+      return res.status(400).json({ error: 'Amount must be a positive number (in naira).' });
+    const entryDate =
+      d.entry_date !== undefined ? validDateStr(d.entry_date) : existing.entry_date;
+    if (!entryDate)
+      return res.status(400).json({ error: 'Please provide a valid date.' });
+    const note = String(d.note ?? existing.note).trim();
+    const entry = await one(
+      `UPDATE account_entries
+          SET kind=$1, name=$2, amount=$3, entry_date=$4, note=$5, updated_at=NOW()
+        WHERE id=$6
+        RETURNING id, year, kind, name, amount,
+                  TO_CHAR(entry_date, 'YYYY-MM-DD') AS entry_date,
+                  note, updated_at`,
+      [kind, name, amount, entryDate, note, existing.id]
+    );
+    res.json({ entry });
+  })
+);
+
+router.delete(
+  '/account/entries/:id',
+  aw(async (req, res) => {
+    const entry = await one('SELECT * FROM account_entries WHERE id = $1', [
+      Number(req.params.id)
+    ]);
+    if (!entry) return res.status(404).json({ error: 'Entry not found.' });
+    await q('DELETE FROM account_entries WHERE id = $1', [entry.id]);
+    res.json({ ok: true });
+  })
+);
+
 module.exports = router;
