@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS account_years (
   year                 INT NOT NULL UNIQUE,
   opening_balance      DOUBLE PRECISION NOT NULL DEFAULT 0,
   financial_secretary  TEXT NOT NULL DEFAULT '',
+  report_note          TEXT NOT NULL DEFAULT '',
   updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -35,3 +36,7 @@ CREATE TABLE IF NOT EXISTS account_entries (
 );
 
 CREATE INDEX IF NOT EXISTS idx_account_entries_year ON account_entries(year, kind, entry_date);
+
+-- If the account tables were created by an earlier version of this script,
+-- add the report note column (shown bold + italic at the end of reports).
+ALTER TABLE account_years ADD COLUMN IF NOT EXISTS report_note TEXT NOT NULL DEFAULT '';
