@@ -7,7 +7,7 @@ export const SITE = {
   mottoRef: "Psalm 133:1",
   tagline: "One seminary family, one brotherhood for life.",
   email: "info@savioboscoalphas.org",
-  phone: "+234 803 000 0000",
+  phone: "+234 706 507 1252",
   address:
     "Anambra State, Nigeria"
 };
