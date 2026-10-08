@@ -129,12 +129,21 @@ CREATE INDEX IF NOT EXISTS idx_documents_type_year ON documents(type, year);
 CREATE INDEX IF NOT EXISTS idx_gallery_year ON gallery(event_year);
 
 -- ---------- Executives (admin-managed, public site) ----------
+CREATE TABLE IF NOT EXISTS executive_tenures (
+  id          SERIAL PRIMARY KEY,
+  start_year  INT NOT NULL,
+  end_year    INT NOT NULL,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CHECK (end_year >= start_year)
+);
+
 CREATE TABLE IF NOT EXISTS executives (
   id          SERIAL PRIMARY KEY,
   name        TEXT NOT NULL,
   position    TEXT NOT NULL,
   image       TEXT NOT NULL DEFAULT '',
   sort_order  INT NOT NULL DEFAULT 0,
+  tenure_id   INT REFERENCES executive_tenures(id) ON DELETE CASCADE,
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

@@ -61,10 +61,18 @@ router.get('/gallery', async (req, res) => {
 });
 
 router.get('/executives', async (req, res) => {
-  const rows = await q(
-    'SELECT id, name, position, image FROM executives ORDER BY sort_order ASC, id ASC'
-  );
-  res.json({ executives: rows });
+  const [rows, tenures] = await Promise.all([
+    q(
+      `SELECT id, name, position, image, tenure_id FROM executives
+       ORDER BY sort_order ASC, id ASC`
+    ),
+    q('SELECT id, start_year, end_year FROM executive_tenures ORDER BY end_year DESC, id DESC')
+  ]);
+  const past = tenures.map((t) => ({
+    ...t,
+    executives: rows.filter((r) => r.tenure_id === t.id)
+  }));
+  res.json({ executives: rows.filter((r) => r.tenure_id === null), past });
 });
 
 /* ---------------- Chatbot (constitution + live site data Q&A) ---------------- */
@@ -114,7 +122,7 @@ async function getSiteContext() {
   }
 
   const [executives, settingsRows, memberCount, news, gallery] = await Promise.all([
-    q('SELECT name, position FROM executives ORDER BY sort_order ASC, id ASC'),
+    q('SELECT name, position FROM executives WHERE tenure_id IS NULL ORDER BY sort_order ASC, id ASC'),
     q('SELECT key, value FROM settings'),
     one('SELECT COUNT(*)::int AS c FROM members'),
     q('SELECT title, date, body FROM news ORDER BY date DESC, id DESC LIMIT 8'),

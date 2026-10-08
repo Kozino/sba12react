@@ -9,8 +9,41 @@ type Executive = {
   image: string | null;
 };
 
+type PastTenure = {
+  id: number;
+  start_year: number;
+  end_year: number;
+  executives: Executive[];
+};
+
+function ExecGrid({ list }: { list: Executive[] }) {
+  return (
+    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {list.map((ex) => (
+        <div
+          key={ex.id}
+          className="card flex flex-col items-center p-4 text-center transition-shadow hover:shadow-card-hover sm:p-5"
+        >
+          <CardImage
+            src={ex.image}
+            alt={ex.name}
+            className="aspect-square w-full rounded-xl"
+          />
+          <h2 className="mt-4 font-display text-base font-bold text-navy-900 sm:text-lg">
+            {ex.name}
+          </h2>
+          <p className="mt-1 text-xs font-bold uppercase tracking-wide text-gold-600 sm:text-sm">
+            {ex.position}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ExecutivesPage() {
   const [executives, setExecutives] = useState<Executive[]>([]);
+  const [past, setPast] = useState<PastTenure[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,6 +52,7 @@ export default function ExecutivesPage() {
         const res = await apiFetch("/api/executives");
         const data = await res.json();
         setExecutives(data.executives || []);
+        setPast(data.past || []);
       } finally {
         setLoading(false);
       }
@@ -38,28 +72,45 @@ export default function ExecutivesPage() {
         ) : executives.length === 0 ? (
           <EmptyState message="Executive list coming soon." />
         ) : (
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {executives.map((ex) => (
-              <div
-                key={ex.id}
-                className="card flex flex-col items-center p-4 text-center transition-shadow hover:shadow-card-hover sm:p-5"
-              >
-                <CardImage
-                  src={ex.image}
-                  alt={ex.name}
-                  className="aspect-square w-full rounded-xl"
-                />
-                <h2 className="mt-4 font-display text-base font-bold text-navy-900 sm:text-lg">
-                  {ex.name}
-                </h2>
-                <p className="mt-1 text-xs font-bold uppercase tracking-wide text-gold-600 sm:text-sm">
-                  {ex.position}
-                </p>
-              </div>
-            ))}
-          </div>
+          <>
+            {past.length > 0 && (
+              <h2 className="mb-6 font-display text-xl font-bold text-navy-900 sm:text-2xl">
+                Current Executives
+              </h2>
+            )}
+            <ExecGrid list={executives} />
+          </>
         )}
       </section>
+
+      {!loading && past.length > 0 && (
+        <section className="container-site pb-16">
+          <div className="mb-8 border-b-2 border-gold-400 pb-3">
+            <h2 className="font-display text-xl font-bold text-navy-900 sm:text-2xl">
+              Past Executives
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Those who have served the association in previous tenures.
+            </p>
+          </div>
+          {past.map((t) => (
+            <div key={t.id} className="mb-12">
+              <h3 className="font-display text-lg font-bold text-navy-800 sm:text-xl">
+                {t.start_year} – {t.end_year}
+              </h3>
+              <p className="mb-5 mt-0.5 text-xs font-bold uppercase tracking-wide text-slate-400">
+                Tenure of {t.start_year} to {t.end_year}
+              </p>
+              {t.executives.length === 0 ? (
+                <p className="text-sm text-slate-400">Records for this tenure are being updated.</p>
+              ) : (
+                <ExecGrid list={t.executives} />
+              )}
+            </div>
+          ))}
+        </section>
+      )}
+
       <CtaBand
         title="Part of the family?"
         text="Register your details to appear in the association roll. Once the executives approve your registration, your unique member ID unlocks the Audit Portal."

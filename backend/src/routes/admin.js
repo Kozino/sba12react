@@ -442,6 +442,17 @@ router.delete(
 
 
 // ---- executives ----
+// '' / undefined → keep current value (or NULL = current executives); a number must exist.
+async function parseTenureId(raw, fallback) {
+  if (raw === undefined) return fallback ?? null;
+  if (raw === '' || raw === null) return null;
+  const id = Number(raw);
+  if (!Number.isInteger(id)) return new Error('Invalid tenure.');
+  const t = await one('SELECT id FROM executive_tenures WHERE id = $1', [id]);
+  if (!t) return new Error('That tenure no longer exists.');
+  return id;
+}
+
 router.get(
   '/executives',
   aw(async (req, res) => {
@@ -465,9 +476,11 @@ router.post(
       image = name;
     }
     const sortOrder = Number.isFinite(Number(fields.sort_order)) ? Number(fields.sort_order) : 0;
+    const tenureId = await parseTenureId(fields.tenure_id, undefined);
+    if (tenureId instanceof Error) return res.status(400).json({ error: tenureId.message });
     const item = await one(
-      `INSERT INTO executives (name, position, image, sort_order) VALUES ($1,$2,$3,$4) RETURNING *`,
-      [String(fields.name).trim(), String(fields.position).trim(), image, sortOrder]
+      `INSERT INTO executives (name, position, image, sort_order, tenure_id) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+      [String(fields.name).trim(), String(fields.position).trim(), image, sortOrder, tenureId]
     );
     res.status(201).json({ item });
   })
@@ -494,10 +507,12 @@ router.put(
       fields.sort_order !== undefined && fields.sort_order !== ''
         ? Number(fields.sort_order)
         : existing.sort_order;
+    const tenureId = await parseTenureId(fields.tenure_id, existing.tenure_id);
+    if (tenureId instanceof Error) return res.status(400).json({ error: tenureId.message });
     const item = await one(
-      `UPDATE executives SET name=$1, position=$2, image=$3, sort_order=$4, updated_at=NOW()
-        WHERE id=$5 RETURNING *`,
-      [String(fields.name).trim(), String(fields.position).trim(), image, sortOrder, Number(req.params.id)]
+      `UPDATE executives SET name=$1, position=$2, image=$3, sort_order=$4, tenure_id=$5, updated_at=NOW()
+        WHERE id=$6 RETURNING *`,
+      [String(fields.name).trim(), String(fields.position).trim(), image, sortOrder, tenureId, Number(req.params.id)]
     );
     res.json({ item });
   })
@@ -509,6 +524,65 @@ router.delete(
     if (!item) return res.status(404).json({ error: 'Executive not found.' });
     await q('DELETE FROM executives WHERE id = $1', [item.id]);
     await deleteFile(item.image);
+    res.json({ ok: true });
+  })
+);
+
+// ---- executive tenures (past executives) ----
+router.get(
+  '/executive-tenures',
+  aw(async (req, res) => {
+    const [tenures, rows] = await Promise.all([
+      q('SELECT * FROM executive_tenures ORDER BY end_year DESC, id DESC'),
+      q('SELECT * FROM executives WHERE tenure_id IS NOT NULL ORDER BY sort_order ASC, id ASC')
+    ]);
+    res.json({
+      tenures: tenures.map((t) => ({ ...t, executives: rows.filter((r) => r.tenure_id === t.id) }))
+    });
+  })
+);
+router.post(
+  '/executive-tenures',
+  aw(async (req, res) => {
+    const s = Number(req.body?.start_year);
+    const e = Number(req.body?.end_year);
+    if (!Number.isInteger(s) || !Number.isInteger(e) || s < 1900 || e > 2200 || e < s)
+      return res
+        .status(400)
+        .json({ error: 'Enter valid years — the end year must not be before the start year.' });
+    const item = await one(
+      'INSERT INTO executive_tenures (start_year, end_year) VALUES ($1,$2) RETURNING *',
+      [s, e]
+    );
+    res.status(201).json({ item });
+  })
+);
+router.put(
+  '/executive-tenures/:id',
+  aw(async (req, res) => {
+    const existing = await one('SELECT * FROM executive_tenures WHERE id = $1', [Number(req.params.id)]);
+    if (!existing) return res.status(404).json({ error: 'Tenure not found.' });
+    const s = req.body?.start_year !== undefined ? Number(req.body.start_year) : existing.start_year;
+    const e = req.body?.end_year !== undefined ? Number(req.body.end_year) : existing.end_year;
+    if (!Number.isInteger(s) || !Number.isInteger(e) || s < 1900 || e > 2200 || e < s)
+      return res
+        .status(400)
+        .json({ error: 'Enter valid years — the end year must not be before the start year.' });
+    const item = await one(
+      'UPDATE executive_tenures SET start_year=$1, end_year=$2, updated_at=NOW() WHERE id=$3 RETURNING *',
+      [s, e, Number(req.params.id)]
+    );
+    res.json({ item });
+  })
+);
+router.delete(
+  '/executive-tenures/:id',
+  aw(async (req, res) => {
+    const item = await one('SELECT * FROM executive_tenures WHERE id = $1', [Number(req.params.id)]);
+    if (!item) return res.status(404).json({ error: 'Tenure not found.' });
+    const rows = await q('SELECT image FROM executives WHERE tenure_id = $1', [item.id]);
+    await q('DELETE FROM executive_tenures WHERE id = $1', [item.id]); // cascades to its executives
+    for (const r of rows) await deleteFile(r.image);
     res.json({ ok: true });
   })
 );
