@@ -72,7 +72,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
-      <Footer />
+      {!location.pathname.startsWith("/admin") && <Footer />}
       {!location.pathname.startsWith("/admin") && <ChatWidget />}
     </div>
   );
