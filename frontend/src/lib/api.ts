@@ -3,7 +3,7 @@
  *
  * All data comes from the Express API (hosted on Render).
  * Set VITE_API_URL in Netlify (and in .env locally) to the API's public URL,
- * e.g. https://sba2012-api.onrender.com
+ * e.g. https://sba12react.onrender.com
  */
 export const API = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const TOKEN_KEY = "sba_admin_token";
